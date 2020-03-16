@@ -1,7 +1,5 @@
----
-title: "MaAsLin2 tutorial (with a brief introduction to R)"
-output: html_document
----
+# MaAsLin2 tutorial (with a brief introduction to R)
+
 
 MaAsLin2 is the next generation of MaAsLin (Microbiome Multivariable Association with Linear Models).
 
@@ -14,9 +12,7 @@ If you have questions, please direct it to :
 [MaAsLin Forum](https://forum.biobakery.org/c/Downstream-analysis-and-statistics/MaAsLin2)    
 [Google Groups](https://groups.google.com/forum/#!forum/maaslin-users) (Read only)  
 
---------------------------------------------
-
-## Contents ##
+## Contents
 * [1. Introduction to R](#introduction-to-r)
   * [1.1 Installing R](#installing-r)
   * [1.2 R basics](#r-basics)
@@ -36,17 +32,17 @@ If you have questions, please direct it to :
 * [5. Command Line Interface](#command-line-interface)
 * [6. Full MaAsLin2 Options](#full-maaslin2-options)
 
-## 1. Introduction to R ##
+## 1. Introduction to R
 
-### 1.1 Installing R ###
+### 1.1 Installing R
 
-### 1.2 R basics ###
+### 1.2 R basics
 
-### 1.3 Functions in R ###
+### 1.3 Functions in R
 
-## 2. Installing MaAsLin2 ##
+## 2. Installing MaAsLin2
 
-### 2.1 With Bioconductor ###
+### 2.1 With Bioconductor
 
 Install Bioconductor and then install Maaslin2
 
@@ -60,16 +56,15 @@ BiocManager::install("Maaslin2")
 > sessionInfo()
 R version 3.6.1 (2019-07-05)
 ```
-### 2.2 With Docker ###
+### 2.2 With Docker
 
-## 3. Microbiome Association Detection with MaAsLin2  ##
+## 3. Microbiome Association Detection with MaAsLin2
 
 MaAsLin2 can be run from the command line or as an R function. Both 
 methods require the same arguments, have the same options, 
 and use the same default settings.
 
-### 3.1 MaAsLin2 Input ###
-
+### 3.1 MaAsLin2 Input
 
 MaAsLin2 requires two input files.
 
@@ -100,7 +95,7 @@ the HMP2 data which can be downloaded from https://ibdmdb.org/ .
 
 ``HMP2_metadata.tsv``: is a tab-delimited file with samples as rows and metadata as columns. It is a subset of the metadata file so that it just includes some of the fields.
 
-### 3.2 Running MaAsLin2 ###
+### 3.2 Running MaAsLin2
 
 ```
 library(Maaslin2)
@@ -115,8 +110,7 @@ fit_data <- Maaslin2(
     standardize = FALSE)
 ```
 
-
-### 3.3 MaAsLin2 Output ###
+### 3.3 MaAsLin2 Output
 
 MaAsLin2 generates two types of output files: data and visualization.
 
@@ -148,17 +142,17 @@ MaAsLin2 generates two types of output files: data and visualization.
         * Box plots are for categorical data.
         * Data points plotted are after normalization, filtering, and transform.
 
-## 4. Advanced Topics ##
+## 4. Advanced Topics
 
-### 4.1 Random Effects ###
+### 4.1 Random Effects
   
-### 4.2 Fitering, Normalization, and Transofrmation Options ### 
+### 4.2 Fitering, Normalization, and Transofrmation Options
 
-### 4.3 Setting Baseline Levels ###
+### 4.3 Setting Baseline Levels
   
-### 4.4 Testing for Interactions ###
+### 4.4 Testing for Interactions
 
-## 5. Command Line Interface ####
+## 5. Command Line Interface
 
 ``$ Maaslin2.R --transform=AST --fixed_effects="diagnosis,dysbiosisnonIBD,dysbiosisUC,dysbiosisCD,antibiotics,age" --random_effects="site,subject" --standardize=FALSE inst/extdata/HMP2_taxonomy.tsv inst/extdata/HMP2_metadata.tsv demo_output``
 
@@ -169,7 +163,7 @@ MaAsLin2 generates two types of output files: data and visualization.
     * ``demo_output`` is the path to the folder to write the output
 
 
-## 6. Full MaAsLin2 Options ##
+## 6. Full MaAsLin2 Options
 
 Run MaAsLin2 help to print a list of the options and the default settings.
 
