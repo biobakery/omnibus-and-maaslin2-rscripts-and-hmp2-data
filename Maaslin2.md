@@ -25,16 +25,37 @@ If you have questions, please direct it to :
   * [3.2 Running MaAsLin2](#running-maaslin2)
   * [3.3 MaAsLin2 Output](#maaslin2-output)
 * [4. Advanced Topics](#advanced-topics)
-  * [4.1 Random Effects](#random-effects)
-  * [4.2 Fitering, Normalization, and Transofrmation Options](#fitering-normalization-and-transofrmation-options)
+  * [4.1 Random Effects (Longitudinal)](#random-effects)
+  * [4.2 Filtering, Normalization, and Transformation Options](#filtering-normalization-and-transformation-options)
   * [4.3 Setting Baseline Levels](#setting-baseline-levels)
   * [4.4 Testing for Interactions](#testing-for-interactions)
 * [5. Command Line Interface](#command-line-interface)
 * [6. Full MaAsLin2 Options](#full-maaslin2-options)
 
 ## 1. Introduction to R
+[R](https://www.r-project.org/) is a programming language specializing in 
+statistical computing and graphics. You can use R just the same as any other 
+programming languages, but it is most useful for statistical analyses, with 
+well-established packages for common tasks such as [linear modeling](https://cran.r-project.org/web/packages/lme4/index.html), ['omic 
+data analysis](https://bioconductor.org/), [machine learning](http://topepo.github.io/caret/index.html), and [visualization](https://ggplot2.tidyverse.org/).
 
 ### 1.1 Installing R
+
+#### Installing R for the first time
+
+You can download and install the free R software environment 
+[here](https://cloud.r-project.org/). Note that you should download the latest
+release - this will ensure the R version you have is compatible with MaAsLin2.
+Once you've finished the installation, locate the R software and launch it - 
+you should have a window that looks like this:
+
+![](https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/assets/R_screenshot.png | width=100)
+
+#### (Optional) the RStudio IDE
+
+[RStudio](https://rstudio.com/products/rstudio/) is a freely available 
+IDE (integrated development environment) for R. It is a "wrapper" around R that
+makes development
 
 ### 1.2 R basics
 
