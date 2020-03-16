@@ -49,13 +49,43 @@ release - this will ensure the R version you have is compatible with MaAsLin2.
 Once you've finished the installation, locate the R software and launch it - 
 you should have a window that looks like this:
 
-![](https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/assets/R_screenshot.png | width=100)
+<img src="https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/assets/R_screenshot.png" width="500">
 
 #### (Optional) the RStudio IDE
 
 [RStudio](https://rstudio.com/products/rstudio/) is a freely available 
-IDE (integrated development environment) for R. It is a "wrapper" around R that
-makes development
+IDE (integrated development environment) for R. It is a "wrapper" around R with
+some additional functionalities that makes programming in R a bit easier. Feel 
+free to download RStudio and explore its interface - but it is not required 
+for this tutorial.
+
+#### Important: the right R version
+
+If you already have R installed, then it is possible that the R version you have 
+does not support MaAsLin2. The easiest way to check this is to launch R/RStudio,
+and in the console ("Console" pane in RStudio), type in the following command:
+
+```
+sessionInfo()
+```
+
+The first line of output message should indicate your current R version. For 
+example, I got
+
+```
+> sessionInfo()
+R version 3.6.3 (2020-02-29)
+```
+
+For MaAsLin2 to install, you will need R >= 3.6.0. If your version is older than
+that, please refer to section 
+[Installing R for the first time](#installing-r-for-the-first-time) to download 
+the latest R. Note that
+RStudio users will need to have RStudio "switch" to this later version once it 
+is installed. This should happen automatically for Windows and Mac OS users when
+you relaunch RStudio. For Linux users you might need to bind the correct R 
+executable. For more information refer to [here](https://support.rstudio.com/hc/en-us/articles/200486138-Changing-R-versions-for-RStudio-desktop). Either way, once you have the correct version installed, launch 
+the software and use `sessionInfo()` to make sure that you indeed have R >= 3.6.0.
 
 ### 1.2 R basics
 
