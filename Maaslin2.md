@@ -9,14 +9,14 @@ package for efficiently determining multivariable association between clinical m
 If you use the MaAsLin2 software, please cite our manuscript: Himel Mallick, Timothy L. Tickle, Lauren J. McIver, Gholamali Rahnavard, Long H. Nguyen, George Weingart, Siyuan Ma, Boyu Ren, Emma Schwager, Ayshwarya Subramanian, Joseph N. Paulson, Eric A. Franzosa, Hector Corrada Bravo, Curtis Huttenhower. "Multivariable Association in Population-scale Meta-omics Studies" (In Submission).
 
 If you have questions, please direct it to :   
-[MaAsLin Forum](https://forum.biobakery.org/c/Downstream-analysis-and-statistics/MaAsLin2)    
+[MaAsLin2 Forum](https://forum.biobakery.org/c/Downstream-analysis-and-statistics/MaAsLin2)    
 [Google Groups](https://groups.google.com/forum/#!forum/maaslin-users) (Read only)  
 
 ## Contents
 * [1. Introduction to R](#introduction-to-r)
   * [1.1 Installing R](#installing-r)
   * [1.2 R basics](#r-basics)
-  * [1.3 Functions in R](#functions-in-r)
+  * [1.3 R Functions](#r-functions)
 * [2. Installing MaAsLin2](#installing-maaslin2)
   * [2.1 With Bioconductor](#with-bioconductor)
   * [2.2 With Docker](#with-docker)
@@ -59,14 +59,15 @@ some additional functionalities that makes programming in R a bit easier. Feel
 free to download RStudio and explore its interface - but it is not required 
 for this tutorial.
 
-#### Important: the right R version
+#### Important: the correct R version
 
 If you already have R installed, then it is possible that the R version you have 
 does not support MaAsLin2. The easiest way to check this is to launch R/RStudio,
-and in the console ("Console" pane in RStudio), type in the following command:
+and in the console ("Console" pane in RStudio), type in the following command 
+(without the `>` symbol):
 
 ```
-sessionInfo()
+> sessionInfo()
 ```
 
 The first line of output message should indicate your current R version. For 
@@ -89,7 +90,183 @@ the software and use `sessionInfo()` to make sure that you indeed have R >= 3.6.
 
 ### 1.2 R basics
 
-### 1.3 Functions in R
+#### Basic interactions
+
+The user interacts R by inputting commands at the prompt (`>`). We did so above
+by using the `sessionInf()` command. We can also, for example, ask R to do basic
+cacluations for us:
+
+```
+> 1 + 1
+[1] 2
+```
+
+Additional operators include `-`, `*`, `/`, and `^` (exponentiation). As an 
+example, the following command caculates the (approximate) area of a circle with
+a radius of 2:
+
+```
+> 3.14 * 2^2
+[1] 12.56
+```
+
+#### Variables
+
+You can create variables in R - individual units with names to store values in. 
+These units can then be called on later on, to examine or use their stored values:
+
+```
+> r = 2
+```
+
+In the above command, I created a variable named `r`, and assigned the value `2`
+to it (using the `=` operator). Note that the above command didn't prompt R to 
+generate any output messages; the operation here is implicit. However, I can now 
+able to call on `r` to check its stored value:
+
+```
+> r
+[1] 2
+```
+
+Further more, I can use the variable for future operations:
+
+```
+> 3.14 * r^2
+[1] 12.56
+```
+
+R has some built-in variables that we can directly make use of. For example, the
+`pi` variable stores a more accurate version of the constant $\pi$ than our 
+`3.14`:
+
+```
+> pi
+[1] 3.141593
+```
+
+Now, can you make sense of the following operations (notice how I can change the
+value stored in `r` with a new assignment operation):
+
+```
+> r = 3
+> area = pi * r^2
+> area
+[1] 28.27433
+```
+
+### 1.3 R Functions
+
+Functions are conveniently enclosed operations, that take zero or more input
+and generate the desired outcome. We use a couple of examples to illustrate the
+concept of R functions. The first one, the very basic `c()` function, combines 
+values into a vector:
+
+```
+> c(1, 2, 3)
+[1] 1 2 3
+```
+
+Notice that you call functions by providing parameters (values in the the 
+parentheses) as input. Then then (most times) return values as input. 
+You can, of course, use variables as input, or assign the returned value to 
+new variables. Imagine two researchers individually collected sample 
+measurements of the same population, and now would like to combine their data,
+they can do so with:
+
+```
+> samples1 = c(3, 4, 2, 4, 7, 5, 5, 6, 3, 2)
+> samples2 = c(2, 3)
+> samples_all = c(samples1, samples2)
+> samples_all
+ [1] 3 4 2 4 7 5 5 6 3 2 2 3
+```
+
+The second example, `t.test()`, does exactly what its name suggests: it performs
+a [t-test](https://en.wikipedia.org/wiki/Student%27s_t-test) between two vectors, 
+to see if the difference in their means is statistically significant:
+
+```
+> t.test(samples1, samples2)
+
+	Welch Two Sample t-test
+
+data:  samples1 and samples2
+t = 2.2047, df = 3.9065, p-value = 0.09379
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.4340879  3.6340879
+sample estimates:
+mean of x mean of y 
+      4.1       2.5 
+```
+
+Let's additionally introduce the notion of function arguments: they are 
+"switches" by which you can control the behavior of function 
+calls. For example, here you will notice that the test performed here is a 
+[two-sided test](https://en.wikipedia.org/wiki/One-_and_two-tailed_tests). What if
+we wanted to perform a one-sided test, to see if the average of `samples1` is
+significantly higher than that of `samples2`? For this, we can invoke the 
+`alternative` argument in `t.test`, which lets us select one of the options 
+(`"two.sided"`, `"less"`, or `"greater"`), depending on the alternative hypothesis
+we are interested in. 
+
+```
+> t.test(samples1, samples2, alternative = "greater")
+
+	Welch Two Sample t-test
+
+data:  samples1 and samples2
+t = 2.2047, df = 3.9065, p-value = 0.04689
+alternative hypothesis: true difference in means is greater than 0
+95 percent confidence interval:
+ 0.04217443        Inf
+sample estimates:
+mean of x mean of y 
+      4.1       2.5 
+```
+
+You can check the full list of arguments for functions in R with the command
+`?` + function name. For example `?t.test` gives you the full documentation 
+for the function `t.test`.
+
+#### (Optional) writing your own functions
+
+The functions we used so far are built-in. Just like variables, we can also
+create our own functions, by involking the `function` keyword.
+
+```
+> area_circle = function(r) {
++     return(pi * r^2)
++ }
+> area_circle(r = 3)
+[1] 28.27433
+```
+
+* Question: study the following two functions, aimed at calculating the overall
+mean of samples collected by two separate researchers. 
+  * What happened in each function?
+  * What are their differences?
+  * Which one is better?
+
+```
+> overall_mean1 = function(samples1, samples2) {
++     samples_all = c(samples1, samples2)
++     return(mean(samples_all))
++ }
+> overall_mean2 = function(samples1, samples2) {
++     mean1 = mean(samples1)
++     mean2 = mean(samples2)
++     return((mean1 + mean2) / 2)
++ }
+```
+
+* Hint: imagine the following scenarios:
+  * If the first researcher collected a lot more samples than the second one,
+  which way is better?
+  * If the first researcher collected a lot more samples than the second one,
+  but their experimetal protocal is flawed, leading to overestimation of 
+  measurements, which way is better?
 
 ## 2. Installing MaAsLin2
 
