@@ -14,21 +14,21 @@ If you have questions, please direct it to :
 
 ## Contents
 * [1. Introduction to R](#1-introduction-to-r)
-  * [1.1 Installing R](#1.1-installing-r)
-  * [1.2 R basics](#1.2-r-basics)
-  * [1.3 R Functions](#1.3-r-functions)
+  * [1.1 Installing R](#11-installing-r)
+  * [1.2 R basics](#12-r-basics)
+  * [1.3 R Functions](#13-r-functions)
 * [2. Installing MaAsLin2](#2-installing-maaslin2)
-  * [2.1 With Bioconductor](#2.1-with-bioconductor)
-  * [2.2 With Docker](#2.2-with-docker)
+  * [2.1 With Bioconductor](#21-with-bioconductor)
+  * [2.2 With Docker](#22-with-docker)
 * [3. Microbiome Association Detection with MaAsLin2](#3-microbiome-association-detection-with-maaslin2)
-  * [3.1 MaAsLin2 Input](#3.1-maaslin2-input)
-  * [3.2 Running MaAsLin2](#3.2-running-maaslin2)
-  * [3.3 MaAsLin2 Output](#3.3-maaslin2-output)
+  * [3.1 MaAsLin2 Input](#31-maaslin2-input)
+  * [3.2 Running MaAsLin2](#32-running-maaslin2)
+  * [3.3 MaAsLin2 Output](#33-maaslin2-output)
 * [4. Advanced Topics](#4-advanced-topics)
-  * [4.1 Setting Reference Levels](#4.1-setting-reference-levels)
-  * [4.2 Interactions](#4.2-interactions)
-  * [4.3 Random Effects](#4.3-random-effects)
-  * [4.4 Additional Options](#4.4-additional-options)
+  * [4.1 Setting Reference Levels](#41-setting-reference-levels)
+  * [4.2 Interactions](#42-interactions)
+  * [4.3 Random Effects](#43-random-effects)
+  * [4.4 Additional Options](#44-additional-options)
 * [5. Command Line Interface](#5-command-line-interface)
 
 ## 1. Introduction to R
@@ -162,6 +162,12 @@ example, character strings:
 > circle
 [1] "cake"
 ```
+
+* Question: try the following command in R:
+```
+circle = cake
+```
+Does it run succesfully? What is the problem?
 
 ### 1.3 R Functions
 
@@ -302,8 +308,8 @@ This can be due to one of two reasons:
 1. Your R version is too old. Check this with `sessionInfo()` - if it is older 
 than 3.6, download the most updated version per instructions above.
 
-2. You have an older version of Bioconductor. MaAsLin2 requires Bioconductor
- >= 3.10. You can check your Bioconductor version with 
+2. You have an older version of Bioconductor. MaAsLin2 requires 
+Bioconductor >= 3.10. You can check your Bioconductor version with 
 `BiocManager::version()`. If the returned version is anything older than 3.10,
 you can update with
 
@@ -337,7 +343,6 @@ abundances, and one for sample metadata.
     * This file is tab-delimited.
     * Formatted with features as columns and samples as rows.
     * The transpose of this format is also okay.
-    * Possible metadata in this file include gender or age.
 
 The data file can contain samples not included in the metadata file
 (along with the reverse case). For both cases, those samples not 
@@ -371,7 +376,7 @@ The following command runs MaAsLin2 on the HMP2 data, running a multivariable
 regression model to test for the association between microbial species abundance 
 versus IBD diagnosis and [dysbiosis scores](https://www.nature.com/articles/s41586-019-1237-9) 
 (`fixed_effects = c("diagnosis", "dysbiosis")`). Output are generated in a 
-folder called `demo_output` under my home directory (`output = "~/demo_output"`)
+folder called `demo_output` under my home directory (`output = "~/demo_output"`).
 
 ```
 library(Maaslin2) ## This loads MaAsLin2 into your R environment
@@ -393,11 +398,11 @@ easily manipulate these input data within the R enviroment.
 df_input_data = read.table(file = input_data, header = TRUE, sep = "\t",
                             row.names = 1,
                             stringsAsFactors = FALSE)
-df_input_data
+df_input_data[1:5, 1:5]
 df_input_metadata = read.table(file = input_metadata, header = TRUE, sep = "\t",
                                 row.names = 1,
                                 stringsAsFactors = FALSE)
-df_input_metadata
+df_input_metadata[1:5, ]
 fit_data2 = Maaslin2(
     input_data = df_input_data, 
     input_metadata = df_input_metadata, 
@@ -426,7 +431,7 @@ threshold, ordered by increasing q-values. Columns are:
   * Coefficients for categorical variables indicate the contrast between the
     category specified in `value` versus the reference category.
   * MaAsLin2 by default sets the first category in alphabetical order as the 
-    reference. See [4.3 Setting Reference Levels](#setting-reference-levels) on
+    reference. See [4.1 Setting Reference Levels](#41-setting-reference-levels) on
     how to change this behavior.
 * The next column is the standard deviation from the model.
 * The ``N`` column is the total number of data points.
@@ -546,6 +551,10 @@ fit_data6 = Maaslin2(
     fixed_effects = c("diagnosis_modified", "dysbiosis"),
     random_effects = c("subject"))
 ```
+
+If you are interested in testing the effect of time in a longitudinal study,
+then the time point variable should be included in `fixed_effects` during your
+MaAsLin2 call.
 
 * Question: intuitively, can you think of a reason why it is important to 
   address non-independence between samples?
