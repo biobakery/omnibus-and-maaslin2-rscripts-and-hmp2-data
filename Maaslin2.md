@@ -25,12 +25,11 @@ If you have questions, please direct it to :
   * [3.2 Running MaAsLin2](#running-maaslin2)
   * [3.3 MaAsLin2 Output](#maaslin2-output)
 * [4. Advanced Topics](#advanced-topics)
-  * [4.1 Random Effects (Longitudinal)](#random-effects)
-  * [4.2 Filtering, Normalization, and Transformation Options](#filtering-normalization-and-transformation-options)
-  * [4.3 Setting Baseline Levels](#setting-baseline-levels)
-  * [4.4 Testing for Interactions](#testing-for-interactions)
+  * [4.1 Setting Reference Levels](#setting-reference-levels)
+  * [4.2 Interactions](#interactions)
+  * [4.3 Random Effects](#random-effects)
+  * [4.4 Additional Options](# additional-options)
 * [5. Command Line Interface](#command-line-interface)
-* [6. Full MaAsLin2 Options](#full-maaslin2-options)
 
 ## 1. Introduction to R
 [R](https://www.r-project.org/) is a programming language specializing in 
@@ -92,7 +91,7 @@ the software and use `sessionInfo()` to make sure that you indeed have R >= 3.6.
 
 #### Basic interactions
 
-The user interacts R by inputting commands at the prompt (`>`). We did so above
+The user interacts with R by inputting commands at the prompt (`>`). We did so above
 by using the `sessionInf()` command. We can also, for example, ask R to do basic
 cacluations for us:
 
@@ -122,14 +121,14 @@ These units can then be called on later on, to examine or use their stored value
 In the above command, I created a variable named `r`, and assigned the value `2`
 to it (using the `=` operator). Note that the above command didn't prompt R to 
 generate any output messages; the operation here is implicit. However, I can now 
-able to call on `r` to check its stored value:
+call on `r` to check its stored value:
 
 ```
 > r
 [1] 2
 ```
 
-Further more, I can use the variable for future operations:
+I can use stored variables for future operations:
 
 ```
 > 3.14 * r^2
@@ -155,6 +154,15 @@ value stored in `r` with a new assignment operation):
 [1] 28.27433
 ```
 
+Lastly, R can use and handle other "classes" of values than just numbers. For
+example, character strings:
+
+```
+> circle = "cake"
+> circle
+[1] "cake"
+```
+
 ### 1.3 R Functions
 
 Functions are conveniently enclosed operations, that take zero or more input
@@ -168,11 +176,11 @@ values into a vector:
 ```
 
 Notice that you call functions by providing parameters (values in the the 
-parentheses) as input. Then then (most times) return values as input. 
+parentheses) as input. They then (most times) return values as input. 
 You can, of course, use variables as input, or assign the returned value to 
 new variables. Imagine two researchers individually collected sample 
-measurements of the same population, and now would like to combine their data,
-they can do so with:
+measurements of the same population, and now would like to combine their data.
+They can do so with:
 
 ```
 > samples1 = c(3, 4, 2, 4, 7, 5, 5, 6, 3, 2)
@@ -201,18 +209,17 @@ mean of x mean of y
       4.1       2.5 
 ```
 
-Let's additionally introduce the notion of function arguments: they are 
-"switches" by which you can control the behavior of function 
-calls. For example, here you will notice that the test performed here is a 
-[two-sided test](https://en.wikipedia.org/wiki/One-_and_two-tailed_tests). What if
-we wanted to perform a one-sided test, to see if the average of `samples1` is
+Certain function parameters have names, and you can explicitly invoke them during 
+function calls. For example, here you will notice that the test performed 
+is a [two-sided test](https://en.wikipedia.org/wiki/One-_and_two-tailed_tests).
+What if we wanted to perform a one-sided test, to see if the average of `samples1` is
 significantly higher than that of `samples2`? For this, we can invoke the 
-`alternative` argument in `t.test`, which lets us select one of the options 
+`alternative` parameter in `t.test()`, which lets us select one of the options 
 (`"two.sided"`, `"less"`, or `"greater"`), depending on the alternative hypothesis
 we are interested in. 
 
 ```
-> t.test(samples1, samples2, alternative = "greater")
+> t.test(x = samples1, y = samples2, alternative = "greater")
 
 	Welch Two Sample t-test
 
@@ -226,7 +233,7 @@ mean of x mean of y
       4.1       2.5 
 ```
 
-You can check the full list of arguments for functions in R with the command
+You can check the full list of parameters for functions in R with the command
 `?` + function name. For example `?t.test` gives you the full documentation 
 for the function `t.test`.
 
@@ -237,8 +244,8 @@ create our own functions, by involking the `function` keyword.
 
 ```
 > area_circle = function(r) {
-+     return(pi * r^2)
-+ }
+     return(pi * r^2)
+  }
 > area_circle(r = 3)
 [1] 28.27433
 ```
@@ -251,14 +258,14 @@ mean of samples collected by two separate researchers.
 
 ```
 > overall_mean1 = function(samples1, samples2) {
-+     samples_all = c(samples1, samples2)
-+     return(mean(samples_all))
-+ }
+      samples_all = c(samples1, samples2)
+      return(mean(samples_all))
+  }
 > overall_mean2 = function(samples1, samples2) {
-+     mean1 = mean(samples1)
-+     mean2 = mean(samples2)
-+     return((mean1 + mean2) / 2)
-+ }
+      mean1 = mean(samples1)
+      mean2 = mean(samples2)
+      return((mean1 + mean2) / 2)
+  }
 ```
 
 * Hint: imagine the following scenarios:
@@ -272,29 +279,54 @@ mean of samples collected by two separate researchers.
 
 ### 2.1 With Bioconductor
 
-Install Bioconductor and then install Maaslin2
+Once you have the correct R version, you can 
+[install MaAsLin2 with Bioconductor](https://bioconductor.org/packages/release/bioc/html/Maaslin2.html):
 
-```{r, eval=FALSE}
+```
 if(!requireNamespace("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 BiocManager::install("Maaslin2")
 ```
 
+#### The `package ‘Maaslin2’ is not available` error
+
+You might encounter an error message that states:
+
 ```
-> sessionInfo()
-R version 3.6.1 (2019-07-05)
+Warning message:
+package ‘Maaslin2’ is not available (for R version x.x.x) 
 ```
+
+This can be due to one of two reasons:
+
+1. Your R version is too old. Check this with `sessionInfo()` - if it is older 
+than 3.6, download the most updated version per instructions above.
+
+2. You have an older version of Bioconductor. MaAsLin2 requires Bioconductor
+ >= 3.10. You can check your Bioconductor version with 
+`BiocManager::version()`. If the returned version is anything older than 3.10,
+you can update with
+
+```
+BiocManager::install(version = "3.10)
+```
+
+And then
+
+```
+BiocManager::install("Maaslin2")
+```
+
 ### 2.2 With Docker
+
+This is a place holder right now.
 
 ## 3. Microbiome Association Detection with MaAsLin2
 
-MaAsLin2 can be run from the command line or as an R function. Both 
-methods require the same arguments, have the same options, 
-and use the same default settings.
-
 ### 3.1 MaAsLin2 Input
 
-MaAsLin2 requires two input files.
+MaAsLin2 requires two input files, one for taxonomic or functional feature 
+abundances, and one for sample metadata.
 
 1. Data (or features) file
     * This file is tab-delimited.
@@ -312,50 +344,119 @@ The data file can contain samples not included in the metadata file
 included in both files will be removed from the analysis. 
 Also the samples do not need to be in the same order in the two files.
 
-NOTE: If running MaAsLin2 as a function, the data and metadata 
-inputs can be of type ``data.frame`` instead of a path to a file.
-
 Example input files can be found in the ``inst/extdata`` folder 
 of the MaAsLin2 source. The files provided were generated from
 the HMP2 data which can be downloaded from https://ibdmdb.org/ .
 
-``HMP2_taxonomy.tsv``: is a tab-demilited file with species as columns and samples as rows. It is a subset of the taxonomy file so it just includes the species abundances for all samples.
+```    
+input_data = system.file(
+    "extdata", "HMP2_taxonomy.tsv", package="Maaslin2") # The abundance table file
+input_data
+input_metadata = system.file(
+    "extdata", "HMP2_metadata.tsv", package="Maaslin2") # The metadata table file
+input_metadata
+```
 
-``HMP2_metadata.tsv``: is a tab-delimited file with samples as rows and metadata as columns. It is a subset of the metadata file so that it just includes some of the fields.
+``HMP2_taxonomy.tsv``: is a tab-demilited file with species as columns and 
+samples as rows. It is a subset of the taxonomy file so it just includes the 
+species abundances for all samples.
+
+``HMP2_metadata.tsv``: is a tab-delimited file with samples as rows and metadata 
+as columns. It is a subset of the metadata file so that it just includes some of 
+the fields.
 
 ### 3.2 Running MaAsLin2
 
+The following command runs MaAsLin2 on the HMP2 data, running a multivariable
+regression model to test for the association between microbial species abundance 
+versus IBD diagnosis and [dysbiosis scores](https://www.nature.com/articles/s41586-019-1237-9) 
+(`fixed_effects = c("diagnosis", "dysbiosis")`). Output are generated in a 
+folder called `demo_output` under my home directory (`output = "~/demo_output"`)
+
 ```
-library(Maaslin2)
-input_data <- system.file(
-    'extdata','HMP2_taxonomy.tsv', package="Maaslin2")
-input_metadata <-system.file(
-    'extdata','HMP2_metadata.tsv', package="Maaslin2")
-fit_data <- Maaslin2(
-    input_data, input_metadata, 'demo_output', transform = "AST",
-    fixed_effects = c('diagnosis', 'dysbiosisnonIBD','dysbiosisUC','dysbiosisCD', 'antibiotics', 'age'),
-    random_effects = c('site', 'subject'),
-    standardize = FALSE)
+library(Maaslin2) ## This loads MaAsLin2 into your R environment
+fit_data = Maaslin2(
+    input_data = input_data, 
+    input_metadata = input_metadata, 
+    output = "~/demo_output", 
+    fixed_effects = c("diagnosis", "dysbiosis"))
 ```
 
+#### Providing data frames as input
+
+If you are familiar with the data frame class in R, you can also provide data 
+frames for `input_data` and `input_metadata` for MaAsLin2, instead of 
+file names. One potential benefit of this approach is that it allows you to 
+easily manipulate these input data within the R enviroment.
+
+```
+df_input_data = read.table(file = input_data, header = TRUE, sep = "\t",
+                            row.names = 1,
+                            stringsAsFactors = FALSE)
+df_input_data
+df_input_metadata = read.table(file = input_metadata, header = TRUE, sep = "\t",
+                                row.names = 1,
+                                stringsAsFactors = FALSE)
+df_input_metadata
+fit_data2 = Maaslin2(
+    input_data = df_input_data, 
+    input_metadata = df_input_metadata, 
+    output = "~/demo_output2", 
+    fixed_effects = c("diagnosis", "dysbiosis"))
+```
+
+* Question: how would I run the same analysis, but only on CD and nonIBD 
+  subjects?
+  * Hint: try `?subset`
+
 ### 3.3 MaAsLin2 Output
+
+#### Significant associations
+
+Perhaps the most important output from MaAsLin2 is the list of significant 
+associations. These are provided in `significant_results.tsv`:
+
+<img src="https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/assets/sigresults_screenshot.png" width="500">
+
+These are the full list of associations that pass MaAsLin2's significance 
+threshold, ordered by increasing q-values. Columns are:
+
+* The first columns are the metadata and feature names.
+* The next two columns are the value and coefficient from the model.
+  * Coefficients for categorical variables indicate the contrast between the
+    category specified in `value` versus the reference category.
+  * MaAsLin2 by default sets the first category in alphabetical order as the 
+    reference. See [4.3 Setting Reference Levels](#setting-reference-levels) on
+    how to change this behavior.
+* The next column is the standard deviation from the model.
+* The ``N`` column is the total number of data points.
+* The ``N.not.zero`` column is the total of non-zero data points.
+* The pvalue from the calculation is the second to last column.
+* The qvalue is computed with `p.adjust` with the correction method.
+
+* Question: how would you interpret the first row of this table?
+
+For each of the significant associations in `significant_results.tsv`, MaAsLin2
+also generates visualizations for inspection (boxplots for categorical variables,
+scatter plots for continuous). These are named as "metadata_name.pdf". For 
+example, from our analysis run, we have the visualization files `dysbiosis.pdf`
+and `diagnosis.pdf`:
+
+<img src="https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/assets/scatterplot_screenshot.png" width="500">
+
+<img src="https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/assets/boxplot_screenshot.png" width="500">
+
+#### Full list of output files
 
 MaAsLin2 generates two types of output files: data and visualization.
 
 1. Data output files
-    * ``all_results.tsv``
-        * This includes the same data as the data.frame returned.
-        * This file contains all results ordered by increasing q-value.
-        * The first columns are the metadata and feature names.
-        * The next two columns are the value and coefficient from the model.
-        * The next column is the standard deviation from the model.
-        * The ``N`` column is the total number of data points.
-        * The ``N.not.zero`` column is the total of non-zero data points.
-        * The pvalue from the calculation is the second to last column.
-        * The qvalue is computed with `p.adjust` with the correction method.
     * ``significant_results.tsv``
-        * This file is a subset of the results in the first file.
-        * It only includes associations with q-values <= to the threshold.
+        * As introduced above.
+    * ``all_results.tsv``
+        * Same format as ``significant_results.tsv``, but include all 
+          association results (instead of just the significant ones).
+        * You can also access this table within R using `fit_data$results`.
     * ``residuals.rds``
         * This file contains a data frame with residuals for each feature.
     * ``maaslin2.log``
@@ -372,17 +473,133 @@ MaAsLin2 generates two types of output files: data and visualization.
 
 ## 4. Advanced Topics
 
-### 4.1 Random Effects
-  
-### 4.2 Fitering, Normalization, and Transofrmation Options
+### 4.1 Setting Reference Levels
 
-### 4.3 Setting Baseline Levels
-  
-### 4.4 Testing for Interactions
+Since MaAsLin2 by default treats the first category in alphabetical order as
+the reference, the first way of setting reference levels is by prefixing the 
+desired reference category with strings such as `"a_"`:
+
+```
+df_input_metadata$diagnosis_modified = df_input_metadata$diagnosis 
+unique(df_input_metadata$diagnosis)
+df_input_metadata$diagnosis_modified[df_input_metadata$diagnosis_modified == "nonIBD"] =
+  "a_nonIBD"
+fit_data3 = Maaslin2(
+    input_data = df_input_data, 
+    input_metadata = df_input_metadata, 
+    output = "~/demo_output3", 
+    fixed_effects = c("diagnosis_modified", "dysbiosis"))
+```
+
+Alternatively, we can set the reference level by changing the categorical into
+a factor (see `?factor`), with its first level being the desired reference:
+
+```
+df_input_metadata$diagnosis_modified = factor(df_input_metadata$diagnosis,
+                                              levels = c("nonIBD", "CD", "UC"))
+fit_data4 = Maaslin2(
+    input_data = df_input_data, 
+    input_metadata = df_input_metadata, 
+    output = "~/demo_output4", 
+    fixed_effects = c("diagnosis_modified", "dysbiosis"))
+```
+
+### 4.2 Interactions
+
+Many statistical analysis are interested in testing for [interaction](https://en.wikipedia.org/wiki/Interaction_(statistics)#In_regression) 
+between certain variables. Unfortunately, MaAsLin2 does not provide a direct 
+interface for this. Instead, the user needs to create artificial interaction
+columns as additional `fixed_effects` terms. Using the above fit as an example,
+to test for the interaction between `diagnosis_modified` and `dysbiosis`, I
+can create two additional columns: `CD_dysbiosis` and `UC_dysbiosis` (since the 
+reference for `diagnosis_modified` is `nonIBD`):
+
+```
+df_input_metadata$CD_dysbiosis = (df_input_metadata$diagnosis_modified == "CD") *
+                                 df_input_metadata$dysbiosis
+df_input_metadata$UC_dysbiosis = (df_input_metadata$diagnosis_modified == "UC") *
+                                 df_input_metadata$dysbiosis
+fit_data5 = Maaslin2(
+    input_data = df_input_data, 
+    input_metadata = df_input_metadata, 
+    output = "~/demo_output5", 
+    fixed_effects = c("diagnosis_modified", "dysbiosis", "CD_dysbiosis", "UC_dysbiosis"))
+```
+
+### 4.3 Random Effects
+
+Certain studies have a natural "grouping" of sample observations, such
+as by subject in longitudinal designs or by family in family designs. It is 
+important for statistic analysis to address the non-independence between samples
+belonging to the same group MaAsLin2 provides a simple interface for this
+through the parameter `random_effects`, where the user can specify the grouping
+variable to run a [mixed effect model](https://cran.r-project.org/web/packages/lme4/index.html) instead. For
+example, we note that HMP2 is a longitudinal design where the same subject 
+(column `subject`) can have multiple samples. We thus aski MaAsLin2 to use
+subject as its random effect grouping variable:
+
+```
+fit_data6 = Maaslin2(
+    input_data = df_input_data, 
+    input_metadata = df_input_metadata, 
+    output = "~/demo_output6", 
+    fixed_effects = c("diagnosis_modified", "dysbiosis"),
+    random_effects = c("subject"))
+```
+
+* Question: intuitively, can you think of a reason why it is important to 
+  address non-independence between samples?
+  * Hint: imagine the simple scenario where you have two subject, one case and 
+    one control, each has two samples.
+  * What is the effective sample size, when samples of the same subject are 
+    highly independent, versus when they are highly correlated?
+
+### 4.4 Additional Options
+
+MaAsLin2 provide many parameter options for different data pre-processing (normalization,
+filtering, transfomation) and other tasks. The full list of these options are:
+
+* `min_abundance`
+  * The minimum abundance for each feature [ Default: `0` ]
+* `min_prevalence`
+  * The minimum percent of samples for which a feature is detected at minimum 
+  abundance [ Default: `0.1` ]
+* `max_significance`
+  * The q-value threshold for significance [ Default: `0.25` ]
+* `normalization`
+  * The normalization method to apply [ Default: `"TSS"` ]
+        [ Choices: `"TSS"`, `"CLR"`, `"CSS"`, `"NONE"`, `"TMM"` ]
+* `transform`
+  * The transform to apply [ Default: `"LOG"` ]
+        [ Choices: `"LOG"`, `"LOGIT"`, `"AST"`, `"NONE"` ]
+* `analysis_method`
+  * The analysis method to apply [ Default: `"LM"` ]
+        [ Choices: `"LM"`, `"CPLM"`, `"ZICP"`, `"NEGBIN"`, `"ZINB"` ]
+* `correction`
+  * The correction method for computing the 
+        q-value [ Default: `"BH"` ]
+* `standardize`
+  * Apply z-score so continuous metadata are 
+        on the same scale [ Default: `TRUE` ]
+* `plot_heatmap`
+  * Generate a heatmap for the significant 
+        associations [ Default: `TRUE` ]
+* `heatmap_first_n`
+  * In heatmap, plot top N features with significant 
+        associations [ Default: `50` ]
+* `plot_scatter`
+  * Generate scatter plots for the significant
+        associations [ Default: `TRUE` ]
+* `cores`
+  * The number of R processes to run in parallel
+        [ Default: `1` ]
 
 ## 5. Command Line Interface
 
-``$ Maaslin2.R --transform=AST --fixed_effects="diagnosis,dysbiosisnonIBD,dysbiosisUC,dysbiosisCD,antibiotics,age" --random_effects="site,subject" --standardize=FALSE inst/extdata/HMP2_taxonomy.tsv inst/extdata/HMP2_metadata.tsv demo_output``
+MaAsLin2 can also be run with a command line interface. For example, the demo
+analysis can be performed with:
+
+``$ Maaslin2.R --transform=AST --fixed_effects="diagnosis,dysbiosis"  inst/extdata/HMP2_taxonomy.tsv inst/extdata/HMP2_metadata.tsv demo_output``
 
 * Make sure to provide the full path to the MaAsLin2 executable (ie ./R/Maaslin2.R).
 * In the demo command:
@@ -390,14 +607,11 @@ MaAsLin2 generates two types of output files: data and visualization.
     * ``HMP2_metadata.tsv`` is the path to your metadata file
     * ``demo_output`` is the path to the folder to write the output
 
+Full help documentation:
 
-## 6. Full MaAsLin2 Options
-
-Run MaAsLin2 help to print a list of the options and the default settings.
-
+```
 $ Maaslin2.R --help
 Usage: ./R/Maaslin2.R [options] <data.tsv> <metadata.tsv> <output_folder>
-
 
 Options:
     -h, --help
@@ -456,3 +670,4 @@ Options:
     -e CORES, --cores=CORES
         The number of R processes to run in parallel
         [ Default: 1 ]
+```
