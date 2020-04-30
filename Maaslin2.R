@@ -5,7 +5,7 @@
 # MGX species
 #####
 # You can either download the file from bitbucket page or do it with the below code:
-download.file("https://bitbucket.org/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/downloads/taxonomic_profiles_pcl_week0.csv", "./Data/taxonomic_profiles_pcl_week0.csv") # Download the mgx species data and put it into the data directory
+download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/taxonomic_profiles_pcl_week0.csv", "./Data/taxonomic_profiles_pcl_week0.csv") # Download the mgx species data and put it into the data directory
 
 # Read the taxonomic data into R environment
 tax = read.csv(file = "./Data/taxonomic_profiles_pcl_week0.csv", header = T, row.names = 1, check.names = FALSE)
@@ -65,7 +65,7 @@ species = data.frame(t(species), check.names = F)
 # MGX pathways
 #####
 # You can either download the file from bitbucket page or do it with the below code:
-download.file("https://bitbucket.org/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/downloads/dna_pathabundance_relab_pcl_week0.csv", "./Data/dna_pathabundance_relab_pcl_week0.csv")
+download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/dna_pathabundance_relab_pcl_week0.csv", "./Data/dna_pathabundance_relab_pcl_week0.csv")
 
 # Read the dna pathway data into R environment
 dna_path = read.csv(file = "./Data/dna_pathabundance_relab_pcl_week0.csv", header = T, row.names = 1, check.names = FALSE)
@@ -101,7 +101,7 @@ dna_path_unstratified = data.frame(t(dna_path_unstratified), check.names = F)
 # MTX pathways
 #####
 # You can either download the file from bitbucket page or do it with the below code:
-download.file("https://bitbucket.org/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/downloads/rna_pathabundance_relab_pcl_week0.csv", "./Data/rna_pathabundance_relab_pcl_week0.csv")
+download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/rna_pathabundance_relab_pcl_week0.csv", "./Data/rna_pathabundance_relab_pcl_week0.csv")
 
 # Read the rna pathway data into R environment
 rna_path = read.csv(file = "./Data/rna_pathabundance_relab_pcl_week0.csv", header = T, row.names = 1, check.names = FALSE)
@@ -145,7 +145,7 @@ rna_path_unstratified = data.frame(t(rna_path_unstratified), check.names = F)
 # RNA/DNA pathway ratios
 #####
 # You can either download the file from bitbucket page or do it with the below code:
-download.file("https://bitbucket.org/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/downloads/rna_dna_path_relative_expression_week0.csv", "./Data/rna_dna_path_relative_expression_week0.csv")
+download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/rna_dna_path_relative_expression_week0.csv", "./Data/rna_dna_path_relative_expression_week0.csv")
 
 # Read the rna_dna pathway data into R environment
 rna_dna_path = read.csv(file = "./Data/rna_dna_path_relative_expression_week0.csv", header = T, row.names = 1, check.names = FALSE)
