@@ -1,5 +1,35 @@
 # High-dimensional testing lab tutorial
 
+
+- [Omnibus tests on mgx and mtx data from the HMP2. Baseline only data.](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
+  * [MGX taxonomy](#mgx-taxonomy)
+    + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
+    + [Alpha diversity](#alpha-diversity)
+      - [Shannon alpha diversity: Univariate](#shannon-alpha-diversity--univariate)
+      - [Shannon alpha diversity: Multivariate](#shannon-alpha-diversity--multivariate)
+    + [Beta Diversity: PERMANOVA tests using Bray-Curtis dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity)
+      - [Univariate](#univariate)
+      - [Multivariate](#multivariate)
+  * [MGX pathways](#mgx-pathways)
+    + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-1)
+    + [Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity)
+      - [Univariate](#univariate-1)
+      - [Multivariate](#multivariate-1)
+  * [MTX pathways](#mtx-pathways)
+    + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-2)
+    + [Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity-1)
+      - [Univariate](#univariate-2)
+      - [Multivariate](#multivariate-2)
+  * [RNA/DNA pathway ratios](#rna-dna-pathway-ratios)
+    + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-3)
+    + [Beta Diversity: PERMANOVA tests using Euclidean distances](#beta-diversity--permanova-tests-using-euclidean-distances)
+      - [Univariate](#univariate-3)
+      - [Multivariate](#multivariate-3)
+- [Mantel tests](#mantel-tests)
+
+<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
+
+
 # Omnibus tests on mgx and mtx data from the HMP2. Baseline only data.
 
 Create new directories and set the working directory:
