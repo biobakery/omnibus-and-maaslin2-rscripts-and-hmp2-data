@@ -34,6 +34,7 @@
 
 Create new directories and set the working directory:
 ```
+setwd("~/Desktop")
 dir.create("R_Metagenomic_Statistics")
 dir.create("R_Metagenomic_Statistics/Data")
 setwd("R_Metagenomic_Statistics")
