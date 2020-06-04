@@ -5,26 +5,26 @@
   * [MGX taxonomy](#mgx-taxonomy)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
     + [Alpha diversity](#alpha-diversity)
-      - [Shannon alpha diversity: Univariate](#shannon-alpha-diversity--univariate)
-      - [Shannon alpha diversity: Multivariate](#shannon-alpha-diversity--multivariate)
+      - [Shannon alpha diversity: Univariable](#shannon-alpha-diversity--univariable)
+      - [Shannon alpha diversity: Multivariable](#shannon-alpha-diversity--multivariable)
     + [Beta Diversity: PERMANOVA tests using Bray-Curtis dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity)
-      - [Univariate](#univariate)
-      - [Multivariate](#multivariate)
+      - [Univariable](#univariable)
+      - [Multivariable](#multivariable)
   * [MGX pathways](#mgx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-1)
     + [Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity)
-      - [Univariate](#univariate-1)
-      - [Multivariate](#multivariate-1)
+      - [Univariable](#univariable-1)
+      - [Multivariable](#multivariable-1)
   * [MTX pathways](#mtx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-2)
     + [Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity-1)
-      - [Univariate](#univariate-2)
-      - [Multivariate](#multivariate-2)
+      - [Univariable](#univariable-2)
+      - [Multivariable](#multivariable-2)
   * [RNA/DNA pathway ratios](#rna-dna-pathway-ratios)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-3)
     + [Beta Diversity: PERMANOVA tests using Euclidean distances](#beta-diversity--permanova-tests-using-euclidean-distances)
-      - [Univariate](#univariate-3)
-      - [Multivariate](#multivariate-3)
+      - [Univariable](#univariable-3)
+      - [Multivariable](#multivariable-3)
 - [Mantel tests](#mantel-tests)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -367,7 +367,7 @@ CSM5MCV1_P 1.478073 0.6609943   2.949803 Cedars-Sinai Female White          20  
 ```
 
 
-#### Shannon alpha diversity: Univariate
+#### Shannon alpha diversity: Univariable
 
 Can do this with a for loop:
 ```
@@ -480,9 +480,9 @@ diagnosis  2  0.4046 0.20231  0.6692 0.5146
 Residuals 93 28.1163 0.30233    
 ```
 
-* Question: What are univariate and multivariate tests and what benefit do both provide?
+* Question: What are univariable and multivariable tests and what benefit do both provide?
 
-#### Shannon alpha diversity: Multivariate
+#### Shannon alpha diversity: Multivariable
 
 Can do it without being verbose:
 ```
@@ -518,11 +518,11 @@ diagnosis    2  0.1294 0.06472  0.2184 0.8042
 Residuals   84 24.8887 0.29629           
 ```
 
-* Exercise: Now run univariate models for diagnosis on the Simpson and Inverse Simpson metrics.
+* Exercise: Now run univariable models for diagnosis on the Simpson and Inverse Simpson metrics.
     * Question: How might one easily do this with a shortcut in RStudio?
 
 
-Now to look at all 3 measures together for diagnosis (univariate):
+Now to look at all 3 measures together for diagnosis (univariable):
 ```
 rbind(shannon_diagnosis, simpson_diagnosis, invsimpson_diagnosis)
 
@@ -549,7 +549,7 @@ bray_species = vegdist(species_filt, method = "bray")
 * Question: What makes Bray-Curtis dissimilarity a good metric to use for this type of feature data?
 
 
-#### Univariate
+#### Univariable
 
 Can do this with a for loop:
 ```
@@ -729,7 +729,7 @@ Total     95   28.8747                 1.00000
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-#### Multivariate
+#### Multivariable
 
 Can do it without being verbose:
 ```
@@ -916,7 +916,7 @@ Calculate Bray-Curtis dissimilarity:
 bray_dna_path_unstratified = vegdist(dna_path_unstratified_filt, method = "bray")
 ```
 
-#### Univariate
+#### Univariable
 
 Can do this with a for loop:
 ```
@@ -1083,7 +1083,7 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ```
 
 
-#### Multivariate
+#### Multivariable
 
 Can do it without being verbose:
 ```
@@ -1109,7 +1109,7 @@ Total       95    3.7950                  1.00000
 ```
 
 
-* Question: Wait a minute! Diagnosis was near significant in the univariate model, but is now quite non-significant in the multivariate model. What happened?
+* Question: Wait a minute! Diagnosis was near significant in the univariable model, but is now quite non-significant in the multivariable model. What happened?
 
 
 Alternatively, can write out each variable in the model:
@@ -1353,7 +1353,7 @@ Calculate Bray-Curtis dissimilarity:
 bray_rna_path_unstratified = vegdist(rna_path_unstratified_filt, method = "bray")
 ```
 
-#### Univariate
+#### Univariable
 
 Can do this with a for loop:
 ```
@@ -1534,7 +1534,7 @@ Residuals 25   2.10573 0.084229         0.95685
 Total     27   2.20069                  1.00000       
 ```
 
-#### Multivariate
+#### Multivariable
 
 Can do it without being verbose:
 ```
@@ -1789,7 +1789,7 @@ euclidean_rna_dna_path_unstratified = vegdist(rna_dna_path_unstratified_filt_log
 * Question: Why are we using Euclidean distances on this dataset as opposed to Bray-Curtis dissimilarities that we used on all of the other feature tables?
 
 
-#### Univariate
+#### Univariable
 
 Can do this with a for loop:
 ```
@@ -1985,7 +1985,7 @@ Total     11   1406.29                 1.00000
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-#### Multivariate
+#### Multivariable
 
 Can do it without being verbose:
 ```
@@ -2031,7 +2031,7 @@ Residuals    5    642.24  128.45         0.45669
 Total       11   1406.29                 1.00000       
 ```
 
-Diagnosis goes from being significant in the univariate model to non-significant in the multivariate.
+Diagnosis goes from being significant in the univariable model to non-significant in the multivariable.
 
 
 Now let's look at all of the PERMANOVA results together:
