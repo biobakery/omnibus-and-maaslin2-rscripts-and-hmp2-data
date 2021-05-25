@@ -1,30 +1,33 @@
 # High-dimensional testing lab tutorial
 
-
 - [Omnibus tests on mgx and mtx data from the HMP2. Baseline only data.](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
   * [MGX taxonomy](#mgx-taxonomy)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
     + [Alpha diversity](#alpha-diversity)
-      - [Shannon alpha diversity: Univariable](#shannon-alpha-diversity--univariable)
-      - [Shannon alpha diversity: Multivariable](#shannon-alpha-diversity--multivariable)
-    + [Beta Diversity: PERMANOVA tests using Bray-Curtis dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity)
+      - [Shannon alpha diversity Univariable](#shannon-alpha-diversity-univariable)
+      - [Shannon alpha diversity Multivariable](#shannon-alpha-diversity-multivariable)
+    + [Beta Diversity PERMANOVA tests using Bray-Curtis dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity)
       - [Univariable](#univariable)
       - [Multivariable](#multivariable)
+      - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons)
   * [MGX pathways](#mgx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-1)
-    + [Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity)
+    + [Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity)
       - [Univariable](#univariable-1)
       - [Multivariable](#multivariable-1)
+      - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons-1)
   * [MTX pathways](#mtx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-2)
-    + [Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity--permanova-tests-using-bray-curtis-dissimilarity-1)
+    + [Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity-1)
       - [Univariable](#univariable-2)
       - [Multivariable](#multivariable-2)
-  * [RNA/DNA pathway ratios](#rna-dna-pathway-ratios)
+      - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons-2)
+  * [RNA DNA pathway ratios](#rna-dna-pathway-ratios)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-3)
-    + [Beta Diversity: PERMANOVA tests using Euclidean distances](#beta-diversity--permanova-tests-using-euclidean-distances)
+    + [Beta Diversity PERMANOVA tests using Euclidean distances](#beta-diversity-permanova-tests-using-euclidean-distances)
       - [Univariable](#univariable-3)
       - [Multivariable](#multivariable-3)
+      - [Pairwise Euclidean comparisons](#pairwise-euclidean-comparisons)
 - [Mantel tests](#mantel-tests)
 
 <small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
@@ -32,12 +35,9 @@
 
 # Omnibus tests on mgx and mtx data from the HMP2. Baseline only data.
 
-Create new directories and set the working directory:
+Set the working directory:
 ```
-setwd("~/Desktop")
-dir.create("R_Metagenomic_Statistics")
-dir.create("R_Metagenomic_Statistics/Data")
-setwd("R_Metagenomic_Statistics")
+setwd("Tutorials/highdimtesting")
 ```
 
 Load the R packages needed:
@@ -66,7 +66,8 @@ Check out `tax`:
 Check the dimensions:
 ```
 dim(tax)
-
+```
+```
 [1]   96 1484
 ```
 
@@ -79,14 +80,16 @@ Check out `metadata`:
 
 Check the dimensions:
 ```
-dim (metadata)
-
+dim(metadata)
+```
+```
 [1] 96  5
 ```
 Check the output:
 ```
 head(metadata)
-
+```
+```
             site_name    sex  race consent_age diagnosis
 CSM67UH7 Cedars-Sinai   Male White          69    nonIBD
 CSM79HHW Cedars-Sinai Female White          36        CD
@@ -98,33 +101,36 @@ HSM7J4LP   Cincinnati Female White          12        CD
 Check the structure:
 ```
 str(metadata)
-
+```
+```
 'data.frame':	96 obs. of  5 variables:
- $ site_name  : Factor w/ 5 levels "Cedars-Sinai",..: 1 1 2 2 2 2 2 2 4 4 ...
- $ sex        : Factor w/ 2 levels "Female","Male": 2 1 2 1 2 1 2 1 1 2 ...
- $ race       : Factor w/ 4 levels "Black or African American",..: 4 4 4 4 4 4 4 4 4 4 ...
+ $ site_name  : chr  "Cedars-Sinai" "Cedars-Sinai" "Cincinnati" "Cincinnati" ...
+ $ sex        : chr  "Male" "Female" "Male" "Female" ...
+ $ race       : chr  "White" "White" "White" "White" ...
  $ consent_age: int  69 36 11 16 13 12 16 14 30 57 ...
- $ diagnosis  : Factor w/ 3 levels "CD","nonIBD",..: 2 1 2 1 1 1 3 2 1 2 ...
+ $ diagnosis  : chr  "nonIBD" "CD" "nonIBD" "CD" ...
  ```
 
  Check for NAs in `metadata` that will later cause issues with the PERMANOVAs:
  ```
 count(is.na(metadata))
-
+```
+```
   x.site_name x.sex x.race x.consent_age x.diagnosis freq
 1       FALSE FALSE  FALSE         FALSE       FALSE   90
 2       FALSE FALSE  FALSE          TRUE       FALSE    6
 ```
 Age has 6 NA.
 
-If this was a discrete variable we could just classify the NAs as Unknown and keep them in the model, but since age is a continuous variable typically we would either remove those from the data or impute the median. 
+If this was a discrete variable we could just classify the NAs as Unknown and keep them in the model, but since age is a continuous variable typically we would either remove those from the data or impute. 
 
 In this case let's impute the median in order to keep samples:
 
 Check out unique ages:
 ```
 unique(metadata$consent_age)
-
+```
+```
 [1] 69 36 11 16 13 12 14 30 57 28 61 29 51 21 25 23 17 15 43 47 NA  7 10  8 37 44 26 32  9 40 74 19 55 50 45  6 56 38 76 24 41 53
 ```
 Notice the NA within the numbers.
@@ -135,7 +141,8 @@ metadata$consent_age[is.na(metadata$consent_age)] = median(metadata$consent_age,
 Check the output:
 ```
 unique(metadata$consent_age)
-
+```
+```
 [1] 69 36 11 16 13 12 14 30 57 28 61 29 51 21 25 23 17 15 43 47 20  7 10  8 37 44 26 32  9 40 74 19 55 50 45  6 56 38 76 24 41 53
 ```
 NA has been replaced by 20; good to go.
@@ -151,7 +158,8 @@ Check out `species`:
 Check out the structure:
 ```
 str(species)
-
+```
+```
 'data.frame':	1479 obs. of  96 variables:
  $ CSM67UH7   : num  0 0 0 0 0 ...
  $ CSM79HHW   : num  0 0 0 0 0 0 0 0 0 1 ...
@@ -166,7 +174,8 @@ Everything is numeric; good to go.
 Check the output:
 ```
 species[1:8,1:2]
-
+```
+```
                                                                                       CSM67UH7
 k__Archaea                                                                                                                                                                                        0
 k__Archaea|p__Euryarchaeota                                                                                                                                                                       0
@@ -199,8 +208,9 @@ tmp = species[tmp.ind,]
 ```
 Check the output:
 ```
-row.names(tmp)
-
+row.names(tmp)[1:10]
+```
+```
   [1] "k__Archaea"                                                                                                                                                                           
   [2] "k__Archaea|p__Euryarchaeota"                                                                                                                                                          
   [3] "k__Archaea|p__Euryarchaeota|c__Methanobacteria"                                                                                                                                       
@@ -211,7 +221,6 @@ row.names(tmp)
   [8] "k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_unclassified"                                 
   [9] "k__Bacteria"                                                                                                                                                                          
  [10] "k__Bacteria|p__Acidobacteria"
- ...
 ```
 
 Now that we have removed the strain stratifications, let's select only the species level stratifications, removing all taxonomic levels before it:
@@ -227,8 +236,9 @@ species = tmp[tmp.ind,]
 
 Check the output to make sure that we only have species level stratifications:
 ```
-row.names(species)
-
+row.names(species)[1:10]
+```
+```
   [1] "k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_smithii"                                      
   [2] "k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_unclassified"                                 
   [3] "k__Bacteria|p__Acidobacteria|c__Acidobacteriia|o__Acidobacteriales|f__Acidobacteriaceae|g__Granulicella|s__Granulicella_unclassified"                                                 
@@ -239,7 +249,6 @@ row.names(species)
   [8] "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_graevenitzii"                                                    
   [9] "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_odontolyticus"                                                   
  [10] "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_turicensis"    
- ...
 ```
 
 Remove temp files to clear up space:
@@ -253,8 +262,9 @@ rownames(species) = gsub(".*\\|", "", rownames(species))
 ```
 Check the output:
 ```
-row.names(species)
-
+row.names(species)[1:6]
+```
+```
   [1] "s__Methanobrevibacter_smithii"                 "s__Methanobrevibacter_unclassified"            "s__Granulicella_unclassified"                 
   [4] "s__Terriglobus_unclassified"                   "s__Actinobaculum_schaalii"                     "s__Actinobaculum_unclassified"                
 ```
@@ -262,7 +272,8 @@ row.names(species)
 Now that we have sucessfully truncated the names in `species`, let's check the sample sums (colSums) to make sure they are in proportion format (0-1) and are all ~1:
 ```
 colSums(species)
-
+```
+```
    CSM67UH7    CSM79HHW    HSM67VDT    HSM6XRQB    HSM6XRR3    HSM7J4LP 
   0.9999752   1.0000004   1.0000005   0.9993355   0.9996256   1.0000003 
 ...
@@ -273,9 +284,11 @@ Filter for beta diversity (we will keep species as is for alpha diversity):
 Check the dimensions of species pre-filtering:
 ```
 dim(species)
-
+```
+```
 [1] 572  96
 ```
+
 Filter:
 ```
 species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * ncol(species)), ]
@@ -283,7 +296,8 @@ species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * nco
 Check the dimensions of species post-filtering:
 ```
 dim(species_filt)
-
+```
+```
 [1] 115  96
 ```
 
@@ -293,10 +307,39 @@ species_filt = data.frame(t(species_filt), check.names = F)
 species = data.frame(t(species), check.names = F)
 ```
 
+Check to make sure the sample names are in the same order in both the metadata and the species dataframes:
+```
+row.names(metadata) == row.names(species_filt)
+row.names(metadata) == row.names(species)
+```
+```
+ [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[46] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[61] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[76] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[91] TRUE TRUE TRUE TRUE TRUE TRUE
+
+ [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[46] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[61] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[76] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[91] TRUE TRUE TRUE TRUE TRUE TRUE
+```
+
+>NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there just assign them in R with the following code:
+>```
+>metadata = read.csv(file = "metadata.csv", header = T, row.names = 1, check.names = FALSE)
+>species = read.csv(file = "species.csv", header = T, row.names = 1, check.names = FALSE)
+>species_filt = read.csv(file = "species_filt.csv", header = T, row.names = 1, check.names = FALSE)
+>```
 
 ### Alpha diversity
 
-Using unfiltered species data, we will calculate a few different alpha diveristy metrics:
+Using unfiltered species data, we will calculate a few different alpha diversity metrics:
 ```
 shannon = data.frame(diversity(species, index = "shannon"))
 simpson = data.frame(diversity(species, index = "simpson"))
@@ -312,7 +355,8 @@ alphadiv = cbind(shannon, simpson, invsimpson)
 Check the output:
 ```
 head(alphadiv)
-
+```
+```
          diversity.species..index....shannon.. diversity.species..index....simpson.. diversity.species..index....invsimpson..
 CSM67UH7                             1.7906860                             0.6360532                                 2.747654
 CSM79HHW                             2.5342475                             0.8963525                                 9.648086
@@ -329,7 +373,8 @@ names(alphadiv) = c("Shannon", "Simpson", "InvSimpson")
 Check the output:
 ```
 head(alphadiv)
-
+```
+```
            Shannon   Simpson InvSimpson
 CSM67UH7 1.7906860 0.6360532   2.747654
 CSM79HHW 2.5342475 0.8963525   9.648086
@@ -356,7 +401,8 @@ alpha_met_df$Row.names = NULL
 Check the output:
 ```
 head(alpha_met_df)
-
+```
+```
             Shannon   Simpson InvSimpson    site_name    sex  race consent_age diagnosis
 CSM5FZ3N_P 1.741766 0.6833787   3.158347 Cedars-Sinai Female White          43        CD
 CSM5FZ3T_P 1.634631 0.7566009   4.108479 Cedars-Sinai Female White          76        CD
@@ -367,7 +413,7 @@ CSM5MCV1_P 1.478073 0.6609943   2.949803 Cedars-Sinai Female White          20  
 ```
 
 
-#### Shannon alpha diversity: Univariable
+#### Shannon alpha diversity Univariable
 
 Can do this with a for loop:
 ```
@@ -375,7 +421,8 @@ for (col in names(alpha_met_df)[-c(2:3)]){
   alpha_shannon_univ = anova(lm(as.formula(paste("Shannon ~ ", col)), data = alpha_met_df[-c(2:3)])) 
   print(alpha_shannon_univ)
 }
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -422,7 +469,8 @@ Alternatively, can do it one-by-one:
 ```
 shannon_site = anova(lm(Shannon ~ site_name, data = alpha_met_df))
 shannon_site
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -436,7 +484,8 @@ Residuals 91 26.8477 0.29503
 ```
 shannon_sex = anova(lm(Shannon ~ sex, data = alpha_met_df))
 shannon_sex
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -449,7 +498,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ```
 shannon_race = anova(lm(Shannon ~ race, data = alpha_met_df))
 shannon_race
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -460,7 +510,8 @@ Residuals 92 27.5944 0.29994
 ```
 shannon_age = anova(lm(Shannon ~ consent_age, data = alpha_met_df))
 shannon_age
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -471,7 +522,8 @@ Residuals   94 28.5104 0.303302
 ```
 shannon_diagnosis = anova(lm(Shannon ~ diagnosis, data = alpha_met_df))
 shannon_diagnosis
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -482,13 +534,14 @@ Residuals 93 28.1163 0.30233
 
 * Question: What are univariable and multivariable tests and what benefit do both provide?
 
-#### Shannon alpha diversity: Multivariable
+#### Shannon alpha diversity Multivariable
 
 Can do it without being verbose:
 ```
 shannon_multi = anova(lm(Shannon ~ ., data = alpha_met_df[-c(2:3)]))
 shannon_multi
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -505,7 +558,8 @@ Alternatively, can write out each variable in the model:
 ```
 shannon_multi = anova(lm(Shannon ~ site_name + sex + race + consent_age + diagnosis, data = alpha_met_df))
 shannon_multi
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -525,7 +579,8 @@ Residuals   84 24.8887 0.29629
 Now to look at all 3 measures together for diagnosis (univariable):
 ```
 rbind(shannon_diagnosis, simpson_diagnosis, invsimpson_diagnosis)
-
+```
+```
 Analysis of Variance Table
 
 Response: Shannon
@@ -539,7 +594,7 @@ Residuals2 93 1105.77 11.8900
 ```
 
 
-### Beta Diversity: PERMANOVA tests using Bray-Curtis dissimilarity
+### Beta Diversity PERMANOVA tests using Bray-Curtis dissimilarity
 
 Calculate Bray-Curtis dissimilarity:
 ```
@@ -557,7 +612,8 @@ for (col in names(metadata)){
   adonis_univ <- adonis(as.formula(paste("bray_species ~ ", col)), data = metadata)
   print(adonis_univ)
 }
-
+```
+```
 Call:
 adonis(formula = as.formula(paste("bray_species ~ ", col)), data = metadata) 
 
@@ -638,7 +694,8 @@ Alternatively, can do it one-by-one:
 ```
 adonis_site_tax = adonis(bray_species ~ site_name, data = metadata)
 adonis_site_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ site_name, data = metadata) 
 
@@ -657,7 +714,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ```
 adonis_sex_tax = adonis(bray_species ~ sex, data = metadata)
 adonis_sex_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ sex, data = metadata) 
 
@@ -676,7 +734,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ```
 adonis_age_tax = adonis(bray_species ~ consent_age, data = metadata)
 adonis_age_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ consent_age, data = metadata) 
 
@@ -695,7 +754,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ```
 adonis_race_tax = adonis(bray_species ~ race, data = metadata)
 adonis_race_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ race, data = metadata) 
 
@@ -712,7 +772,8 @@ Total     95   28.8747                 1.00000
 ```
 adonis_diagnosis_tax = adonis(bray_species ~ diagnosis, data = metadata)
 adonis_diagnosis_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ diagnosis, data = metadata) 
 
@@ -735,7 +796,8 @@ Can do it without being verbose:
 ```
 adonis_multi_tax = adonis(bray_species ~ ., data = metadata)
 adonis_multi_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ ., data = metadata) 
 
@@ -760,7 +822,8 @@ Alternatively, can write out each variable in the model:
 ```
 adonis_multi_tax = adonis(bray_species ~ site_name + sex + race + consent_age + diagnosis, data = metadata)
 adonis_multi_tax
-
+```
+```
 Call:
 adonis(formula = bray_species ~ site_name + sex + race + consent_age + diagnosis, data = metadata) 
 
@@ -781,12 +844,27 @@ Total       95   28.8747                 1.00000
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
+#### Pairwise Bray-Curtis comparisons
+Pairwise comparisons of diagnosis in a univariable model
+
+```
+library(pairwiseAdonis)
+bray_species_mat = as.matrix(bray_species)
+pairwise.adonis(bray_species_mat, factors = metadata$diagnosis, p.adjust.m = "BH")
+```
+```
+         pairs Df   SumsOfSqs   F.Model         R2 p.value p.adjusted sig
+1 nonIBD vs CD  1 0.004509742 0.9319883 0.01332707   0.396      0.396    
+2 nonIBD vs UC  1 0.007473162 1.7057327 0.03502119   0.136      0.396    
+3     CD vs UC  1 0.005921838 1.1835337 0.01662651   0.269      0.396   
+```
+
 
 ## MGX pathways
 
 ### Feature table and metadata table creation and formatting
 
-Download the mgx pathway realtive abundance data and put it into the data directory:
+Download the mgx pathway relative abundance data and put it into the data directory:
 ```
 download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/dna_pathabundance_relab_pcl_week0.csv", "./Data/dna_pathabundance_relab_pcl_week0.csv")
 ```
@@ -801,7 +879,8 @@ Check out `dna_path`:
 Check the dimensions:
 ```
 dim(dna_path)
-
+```
+```
 [1]    96 10889
 ```
 
@@ -815,7 +894,8 @@ Check out `dna_path`:
 Check out the structure:
 ```
 str(dna_path)
-
+```
+```
 'data.frame':	10884 obs. of  96 variables:
  $ CSM67UH7   : num  1.37e-02 7.18e-03 0.00 1.53e-04 1.62e-05 ...
  $ CSM79HHW   : num  0.017841 0 0 0.000633 0 ...
@@ -830,7 +910,8 @@ Everything is numeric; good to go.
 Check the output:
 ```
 dna_path[1:8,1:2]
-                                                 
+```
+```
                                                             CSM67UH7    CSM79HHW
 1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis                                                0.013653600 0.017841100
 1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis|g__Akkermansia.s__Akkermansia_muciniphila      0.007178950 0.000000000
@@ -855,8 +936,9 @@ dna_path_unstratified = dna_path[tmp.ind,]
 ```
 Check the output:
 ```
-row.names(dna_path_unstratified)
-
+row.names(dna_path_unstratified)[1:10]
+```
+```
   [1] "1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis"                                                          
   [2] "3-HYDROXYPHENYLACETATE-DEGRADATION-PWY: 4-hydroxyphenylacetate degradation"                                    
   [3] "7ALPHADEHYDROX-PWY: cholate degradation (bacteria, anaerobic)"                                                 
@@ -877,7 +959,8 @@ rm(tmp.ind)
 Now that we have sucessfully unstratified `dna_path`, let's check the sample sums (colSums) to make sure they are in proportion format (0-1) and are all ~1:
 ```
 colSums(dna_path_unstratified)
-
+```
+```
    CSM67UH7    CSM79HHW    HSM67VDT    HSM6XRQB    HSM6XRR3    HSM7J4LP 
   1.0000000   1.0000005   1.0000002   0.9999997   1.0000002   0.9999997 
 ...
@@ -888,7 +971,8 @@ Filter for beta diversity:
 Check the dimensions of dna pathways pre-filtering:
 ```
 dim(dna_path_unstratified)
-
+```
+```
 [1] 466  96
 ```
 Filter:
@@ -898,7 +982,8 @@ dna_path_unstratified_filt = dna_path_unstratified[apply(dna_path_unstratified, 
 Check the dimensions of dna pathways post-filtering:
 ```
 dim(dna_path_unstratified_filt)
-
+```
+```
 [1] 309  96
 ```
 
@@ -908,8 +993,46 @@ dna_path_unstratified_filt = data.frame(t(dna_path_unstratified_filt), check.nam
 dna_path_unstratified = data.frame(t(dna_path_unstratified), check.names = F)
 ```
 
+Check to make sure the sample names are in the same order in both the metadata and the DNA pathways dataframe:
+```
+row.names(metadata) == row.names(dna_path_unstratified_filt)
+```
+```
+ [1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[13]  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE  TRUE  TRUE
+[25]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[37]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[49]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[61]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[73]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[85]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+```
+There are two samples that do not match. Let's match them.
 
-### Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity
+```
+dna_path_unstratified_filt = dna_path_unstratified_filt[match(row.names(metadata), row.names(dna_path_unstratified_filt)),]
+```
+```
+row.names(metadata) == row.names(dna_path_unstratified_filt)
+```
+```
+ [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[46] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[61] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[76] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[91] TRUE TRUE TRUE TRUE TRUE TRUE
+```
+Good to go now.
+
+>NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there just assign them in R with the following code:
+>```
+>dna_path_unstratified_filt = read.csv(file = "dna_path_unstratified_filt.csv", header = T, row.names = 1, check.names = FALSE)
+>```
+
+
+### Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity
 
 Calculate Bray-Curtis dissimilarity:
 ```
@@ -924,82 +1047,10 @@ for (col in names(metadata)){
   adonis_univ <- adonis(as.formula(paste("bray_dna_path_unstratified ~ ", col)), data = metadata)
   print(adonis_univ)
 }
-
-Call:
-adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name  4    0.1763 0.044076  1.1084 0.04646  0.302
-Residuals 91    3.6187 0.039765         0.95354       
-Total     95    3.7950                  1.00000       
-
-Call:
-adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
-sex        1    0.0383 0.038313 0.95867 0.0101  0.441
-Residuals 94    3.7566 0.039964         0.9899       
-Total     95    3.7950                  1.0000       
-
-Call:
-adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-race       3    0.1211 0.040381  1.0112 0.03192  0.402
-Residuals 92    3.6738 0.039933         0.96808       
-Total     95    3.7950                  1.00000       
-
-Call:
-adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-consent_age  1    0.0367 0.036663   0.917 0.00966  0.449
-Residuals   94    3.7583 0.039982         0.99034       
-Total       95    3.7950                  1.00000       
-
-Call:
-adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    0.1327 0.066335  1.6845 0.03496  0.062 .
-Residuals 93    3.6623 0.039379         0.96504         
-Total     95    3.7950                  1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
-
-Alternatively, can do it one-by-one:
 ```
-adonis_site_dna_path = adonis(bray_dna_path_unstratified ~ site_name, data = metadata)
-adonis_site_dna_path
-
 Call:
-adonis(formula = bray_dna_path_unstratified ~ site_name, data = metadata) 
+adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
 
 Permutation: free
 Number of permutations: 999
@@ -1010,11 +1061,86 @@ Terms added sequentially (first to last)
 site_name  4    0.1763 0.044076  1.1084 0.04646  0.294
 Residuals 91    3.6187 0.039765         0.95354       
 Total     95    3.7950                  1.00000       
+
+Call:
+adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+          Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
+sex        1    0.0383 0.038313 0.95867 0.0101  0.435
+Residuals 94    3.7566 0.039964         0.9899       
+Total     95    3.7950                  1.0000       
+
+Call:
+adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
+race       3    0.1211 0.040381  1.0112 0.03192  0.414
+Residuals 92    3.6738 0.039933         0.96808       
+Total     95    3.7950                  1.00000       
+
+Call:
+adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
+consent_age  1    0.0367 0.036663   0.917 0.00966  0.457
+Residuals   94    3.7583 0.039982         0.99034       
+Total       95    3.7950                  1.00000       
+
+Call:
+adonis(formula = as.formula(paste("bray_dna_path_unstratified ~ ",      col)), data = metadata) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
+diagnosis  2    0.1327 0.066335  1.6845 0.03496  0.061 .
+Residuals 93    3.6623 0.039379         0.96504         
+Total     95    3.7950                  1.00000         
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+```
+
+Alternatively, can do it one-by-one:
+```
+adonis_site_dna_path = adonis(bray_dna_path_unstratified ~ site_name, data = metadata)
+adonis_site_dna_path
+```
+```
+Call:
+adonis(formula = bray_dna_path_unstratified ~ site_name, data = metadata) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
+site_name  4    0.1763 0.044076  1.1084 0.04646    0.3
+Residuals 91    3.6187 0.039765         0.95354       
+Total     95    3.7950                  1.00000      
 ```
 ```
 adonis_sex_dna_path = adonis(bray_dna_path_unstratified ~ sex, data = metadata)
 adonis_sex_dna_path
-
+```
+```
 Call:
 adonis(formula = bray_dna_path_unstratified ~ sex, data = metadata) 
 
@@ -1024,14 +1150,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
-sex        1    0.0383 0.038313 0.95867 0.0101  0.437
+sex        1    0.0383 0.038313 0.95867 0.0101  0.431
 Residuals 94    3.7566 0.039964         0.9899       
-Total     95    3.7950                  1.0000       
+Total     95    3.7950                  1.0000            
 ```
 ```
 adonis_age_dna_path = adonis(bray_dna_path_unstratified ~ consent_age, data = metadata)
 adonis_age_dna_path
-
+```
+```
 Call:
 adonis(formula = bray_dna_path_unstratified ~ consent_age, data = metadata) 
 
@@ -1041,14 +1168,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-consent_age  1    0.0367 0.036663   0.917 0.00966  0.453
+consent_age  1    0.0367 0.036663   0.917 0.00966  0.459
 Residuals   94    3.7583 0.039982         0.99034       
-Total       95    3.7950                  1.00000       
+Total       95    3.7950                  1.00000      
 ```
 ```
 adonis_race_dna_path = adonis(bray_dna_path_unstratified ~ race, data = metadata)
 adonis_race_dna_path
-
+```
+```
 Call:
 adonis(formula = bray_dna_path_unstratified ~ race, data = metadata) 
 
@@ -1058,14 +1186,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-race       3    0.1211 0.040381  1.0112 0.03192  0.421
+race       3    0.1211 0.040381  1.0112 0.03192  0.385
 Residuals 92    3.6738 0.039933         0.96808       
 Total     95    3.7950                  1.00000       
 ```
 ```
 adonis_diagnosis_dna_path = adonis(bray_dna_path_unstratified ~ diagnosis, data = metadata)
 adonis_diagnosis_dna_path
-
+```
+```
 Call:
 adonis(formula = bray_dna_path_unstratified ~ diagnosis, data = metadata) 
 
@@ -1075,7 +1204,7 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    0.1327 0.066335  1.6845 0.03496  0.054 .
+diagnosis  2    0.1327 0.066335  1.6845 0.03496  0.056 .
 Residuals 93    3.6623 0.039379         0.96504         
 Total     95    3.7950                  1.00000         
 ---
@@ -1089,7 +1218,8 @@ Can do it without being verbose:
 ```
 adonis_multi_dna_path = adonis(bray_dna_path_unstratified ~ ., data = metadata)
 adonis_multi_dna_path
-
+```
+```
 Call:
 adonis(formula = bray_dna_path_unstratified ~ ., data = metadata) 
 
@@ -1099,11 +1229,11 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4    0.1763 0.044076  1.1105 0.04646  0.296
-sex          1    0.0311 0.031101  0.7836 0.00820  0.578
-race         3    0.1243 0.041425  1.0437 0.03275  0.379
-consent_age  1    0.0293 0.029283  0.7378 0.00772  0.636
-diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.205
+site_name    4    0.1763 0.044076  1.1105 0.04646  0.273
+sex          1    0.0311 0.031101  0.7836 0.00820  0.616
+race         3    0.1243 0.041425  1.0437 0.03275  0.394
+consent_age  1    0.0293 0.029283  0.7378 0.00772  0.620
+diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.222
 Residuals   84    3.3339 0.039690         0.87852       
 Total       95    3.7950                  1.00000       
 ```
@@ -1116,9 +1246,10 @@ Alternatively, can write out each variable in the model:
 ```
 adonis_multi_dna_path = adonis(bray_dna_path_unstratified ~ site_name + sex + race + consent_age + diagnosis, data = metadata)
 adonis_multi_dna_path
-
+```
+```
 Call:
-adonis(formula = bray_dna_path_unstratified ~ site_name + sex + race + consent_age + diagnosis, data = metadata) 
+adonis(formula = bray_dna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata) 
 
 Permutation: free
 Number of permutations: 999
@@ -1126,17 +1257,33 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4    0.1763 0.044076  1.1105 0.04646  0.294
-sex          1    0.0311 0.031101  0.7836 0.00820  0.580
-race         3    0.1243 0.041425  1.0437 0.03275  0.409
-consent_age  1    0.0293 0.029283  0.7378 0.00772  0.636
-diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.194
+site_name    4    0.1763 0.044076  1.1105 0.04646  0.313
+sex          1    0.0311 0.031101  0.7836 0.00820  0.585
+race         3    0.1243 0.041425  1.0437 0.03275  0.384
+consent_age  1    0.0293 0.029283  0.7378 0.00772  0.622
+diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.219
 Residuals   84    3.3339 0.039690         0.87852       
 Total       95    3.7950                  1.00000       
 ```
 
 * Exercise: Run the same model a few times and compare the results.
     * Question: Are you seeing the same results across runs? If not, why is this?
+
+#### Pairwise Bray-Curtis comparisons
+Pairwise comparisons of diagnosis in a univariable model
+
+```
+library(pairwiseAdonis)
+bray_dna_path_unstratified_mat = as.matrix(bray_dna_path_unstratified)
+pairwise.adonis(bray_dna_path_unstratified_mat, factors = metadata$diagnosis, p.adjust.m = "BH")
+```
+```
+         pairs Df  SumsOfSqs  F.Model         R2 p.value p.adjusted sig
+1 nonIBD vs CD  1 0.01580812 1.021681 0.01459093   0.343     0.3430    
+2 nonIBD vs UC  1 0.05216168 3.608071 0.07129439   0.032     0.0960    
+3     CD vs UC  1 0.04085920 2.340545 0.03235454   0.085     0.1275    
+```
+
 
 ## MTX pathways
 
@@ -1157,7 +1304,8 @@ Check out `rna_path`:
 Check the dimensions:
 ```
 dim(rna_path)
-
+```
+```
 [1]   28 6066
 ```
 
@@ -1175,7 +1323,8 @@ Check out `rna_path`:
 Check out the structure:
 ```
 str(rna_path)
-
+```
+```
 'data.frame':	6061 obs. of  28 variables:
  $ HSM6XRQB   : num  0.0167 0 0 0 0 ...
  $ HSM7J4LP   : num  0 0 0 0 0 0 0 0 0 0 ...
@@ -1211,7 +1360,8 @@ Everything is numeric; good to go.
 Check the output:
 ```
 rna_path[1:8,1:2]
-                                                 
+```
+```
                                                             HSM6XRQB HSM7J4LP
 1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis                                                0.0166822        0
 1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis|g__Akkermansia.s__Akkermansia_muciniphila      0.0000000        0
@@ -1228,7 +1378,8 @@ Minimize the metadata to just the samples available in these data:
 Check the dimensions of `metadata` pre-subsetting:
 ```
 dim(metadata)
-
+```
+```
 [1] 96  5
 ```
 
@@ -1240,14 +1391,16 @@ metadata_rna = subset(metadata, row.names(metadata) %in% names(rna_path))
 Check the dimensions of the subsetted metadata:
 ```
 dim(metadata_rna)
-
+```
+```
 [1] 28  5
 ```
 
 Check the output:
 ```
 metadata_rna
-
+```
+```
                  site_name    sex                      race consent_age diagnosis
 HSM6XRQB        Cincinnati Female                     White          16        CD
 HSM7J4LP        Cincinnati Female                     White          12        CD
@@ -1292,8 +1445,9 @@ rna_path_unstratified = rna_path[tmp.ind,]
 ```
 Check the output:
 ```
-row.names(rna_path_unstratified)
-
+row.names(rna_path_unstratified)[1:10]
+```
+```
   [1] "1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis"                                                          
   [2] "3-HYDROXYPHENYLACETATE-DEGRADATION-PWY: 4-hydroxyphenylacetate degradation"                                    
   [3] "7ALPHADEHYDROX-PWY: cholate degradation (bacteria, anaerobic)"                                                 
@@ -1314,7 +1468,8 @@ rm(tmp.ind)
 Now that we have sucessfully unstratified `rna_path`, let's check the sample sums (colSums) to make sure they are in proportion format (0-1) and are all ~1:
 ```
 colSums(rna_path_unstratified)
-
+```
+```
    HSM6XRQB    HSM7J4LP    MSM5LLDI    MSM6J2Q1    MSM79H8D    MSM9VZL5 
   1.0000001   0.9999992   0.9999997   1.0000000   1.0000001   0.9999998 
 ...
@@ -1325,7 +1480,8 @@ Filter for beta diversity:
 Check the dimensions of rna pathways pre-filtering:
 ```
 dim(rna_path_unstratified)
-
+```
+```
 [1] 430  28
 ```
 Filter:
@@ -1335,7 +1491,8 @@ rna_path_unstratified_filt = rna_path_unstratified[apply(rna_path_unstratified, 
 Check the dimensions of rna pathways post-filtering:
 ```
 dim(rna_path_unstratified_filt)
-
+```
+```
 [1] 234  28
 ```
 
@@ -1345,8 +1502,36 @@ rna_path_unstratified_filt = data.frame(t(rna_path_unstratified_filt), check.nam
 rna_path_unstratified = data.frame(t(rna_path_unstratified), check.names = F)
 ```
 
+Check to make sure the sample names are in the same order in both the metadata and the RNA pathways dataframe:
+```
+row.names(metadata_rna) == row.names(rna_path_unstratified_filt)
+```
+```
+ [1]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE FALSE
+[13]  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE  TRUE
+[25]  TRUE  TRUE  TRUE  TRUE
+```
+They do not match. Let's match them.
 
-### Beta Diversity: PERMANOVA tests using Bray-Curtis Dissimilarity
+```
+rna_path_unstratified_filt = rna_path_unstratified_filt[match(row.names(metadata_rna), row.names(rna_path_unstratified_filt)),]
+```
+```
+row.names(metadata_rna) == row.names(rna_path_unstratified_filt)
+```
+```
+ [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+[16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+```
+Good to go now.
+
+>NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there just assign them in R with the following code:
+>```
+>metadata_rna = read.csv(file = "metadata_rna.csv", header = T, row.names = 1, check.names = FALSE)
+>rna_path_unstratified_filt = read.csv(file = "rna_path_unstratified_filt.csv", header = T, row.names = 1, check.names = FALSE)
+>```
+
+### Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity
 
 Calculate Bray-Curtis dissimilarity:
 ```
@@ -1361,7 +1546,8 @@ for (col in names(metadata)){
   adonis_univ <- adonis(as.formula(paste("bray_rna_path_unstratified ~ ", col)), data = metadata)
   print(adonis_univ)
 }
-
+```
+```
 Error in G * t(hat) : non-conformable arrays
 ```
 
@@ -1374,7 +1560,8 @@ Alternatively, can do it one-by-one:
 ```
 adonis_site_rna_path = adonis(bray_rna_path_unstratified ~ site_name, data = metadata_rna)
 adonis_site_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ site_name, data = metadata_rna) 
 
@@ -1384,14 +1571,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name  4   0.33933 0.084834  1.0482 0.15419  0.385
+site_name  4   0.33933 0.084834  1.0482 0.15419  0.336
 Residuals 23   1.86136 0.080929         0.84581       
-Total     27   2.20069                  1.00000   
+Total     27   2.20069                  1.00000       
 ```
 ```
 adonis_sex_rna_path = adonis(bray_rna_path_unstratified ~ sex, data = metadata_rna)
 adonis_sex_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ sex, data = metadata_rna) 
 
@@ -1400,17 +1588,16 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-sex        1   0.12339 0.123389  1.5444 0.05607  0.062 .
-Residuals 26   2.07730 0.079896         0.94393         
-Total     27   2.20069                  1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1   
+          Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
+sex        1    0.0823 0.082297  1.0101 0.0374  0.426
+Residuals 26    2.1184 0.081477         0.9626       
+Total     27    2.2007                  1.0000       
 ```
 ```
 adonis_age_rna_path = adonis(bray_rna_path_unstratified ~ consent_age, data = metadata_rna)
 adonis_age_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ consent_age, data = metadata_rna) 
 
@@ -1420,15 +1607,16 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-consent_age  1   0.08308 0.083081  1.0201 0.03775  0.295
-Residuals   26   2.11761 0.081447         0.96225       
+consent_age  1   0.08368 0.083678  1.0277 0.03802  0.291
+Residuals   26   2.11701 0.081424         0.96198       
 Total       27   2.20069                  1.00000       
 ```
 ```
 adonis_race_rna_path = adonis(bray_rna_path_unstratified ~ race, data = metadata_rna)
 adonis_race_rna_path
-
- Call:
+```
+```
+Call:
 adonis(formula = bray_rna_path_unstratified ~ race, data = metadata_rna) 
 
 Permutation: free
@@ -1437,14 +1625,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-race       3   0.13184 0.043945 0.50979 0.05991  0.901
+race       3   0.13184 0.043945 0.50979 0.05991  0.904
 Residuals 24   2.06886 0.086202         0.94009       
 Total     27   2.20069                  1.00000       
 ```
 ```
 adonis_diagnosis_rna_path = adonis(bray_rna_path_unstratified ~ diagnosis, data = metadata_rna)
 adonis_diagnosis_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ diagnosis, data = metadata_rna) 
 
@@ -1454,9 +1643,9 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-diagnosis  2   0.09497 0.047483 0.56373 0.04315  0.988
-Residuals 25   2.10573 0.084229         0.95685       
-Total     27   2.20069                  1.00000    
+diagnosis  2   0.11062 0.055308 0.66155 0.05026   0.92
+Residuals 25   2.09008 0.083603         0.94974       
+Total     27   2.20069                  1.00000       
 ```
 
 Solution to the for loop question earlier:
@@ -1465,7 +1654,8 @@ for (col in names(metadata_rna)){
   adonis_univ <- adonis(as.formula(paste("bray_rna_path_unstratified ~ ", col)), data = metadata_rna)
   print(adonis_univ)
 }
-
+```
+```
 Call:
 adonis(formula = as.formula(paste("bray_rna_path_unstratified ~ ",      col)), data = metadata_rna) 
 
@@ -1475,7 +1665,7 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name  4   0.33933 0.084834  1.0482 0.15419  0.366
+site_name  4   0.33933 0.084834  1.0482 0.15419  0.369
 Residuals 23   1.86136 0.080929         0.84581       
 Total     27   2.20069                  1.00000       
 
@@ -1487,12 +1677,10 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-sex        1   0.12339 0.123389  1.5444 0.05607  0.049 *
-Residuals 26   2.07730 0.079896         0.94393         
-Total     27   2.20069                  1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+          Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
+sex        1    0.0823 0.082297  1.0101 0.0374  0.435
+Residuals 26    2.1184 0.081477         0.9626       
+Total     27    2.2007                  1.0000       
 
 Call:
 adonis(formula = as.formula(paste("bray_rna_path_unstratified ~ ",      col)), data = metadata_rna) 
@@ -1503,7 +1691,7 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-race       3   0.13184 0.043945 0.50979 0.05991  0.894
+race       3   0.13184 0.043945 0.50979 0.05991  0.909
 Residuals 24   2.06886 0.086202         0.94009       
 Total     27   2.20069                  1.00000       
 
@@ -1516,8 +1704,8 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-consent_age  1   0.08308 0.083081  1.0201 0.03775  0.331
-Residuals   26   2.11761 0.081447         0.96225       
+consent_age  1   0.08368 0.083678  1.0277 0.03802  0.318
+Residuals   26   2.11701 0.081424         0.96198       
 Total       27   2.20069                  1.00000       
 
 Call:
@@ -1529,9 +1717,9 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-diagnosis  2   0.09497 0.047483 0.56373 0.04315  0.989
-Residuals 25   2.10573 0.084229         0.95685       
-Total     27   2.20069                  1.00000       
+diagnosis  2   0.11062 0.055308 0.66155 0.05026  0.921
+Residuals 25   2.09008 0.083603         0.94974       
+Total     27   2.20069                  1.00000        
 ```
 
 #### Multivariable
@@ -1540,7 +1728,8 @@ Can do it without being verbose:
 ```
 adonis_multi_rna_path = adonis(bray_rna_path_unstratified ~ ., data = metadata_rna)
 adonis_multi_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ ., data = metadata_rna) 
 
@@ -1550,12 +1739,12 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4   0.33933 0.084834 0.95180 0.15419  0.487
-sex          1   0.09628 0.096283 1.08026 0.04375  0.366
-race         3   0.15885 0.052948 0.59406 0.07218  0.806
-consent_age  1   0.06621 0.066206 0.74281 0.03008  0.588
-diagnosis    2   0.11395 0.056976 0.63925 0.05178  0.940
-Residuals   16   1.42607 0.089129         0.64801       
+site_name    4   0.33933 0.084834 0.94530 0.15419  0.489
+sex          1   0.05461 0.054609 0.60851 0.02481  0.888
+race         3   0.16446 0.054820 0.61086 0.07473  0.819
+consent_age  1   0.06739 0.067385 0.75088 0.03062  0.558
+diagnosis    2   0.13903 0.069515 0.77461 0.06318  0.811
+Residuals   16   1.43587 0.089742         0.65246       
 Total       27   2.20069                  1.00000       
 ```
 
@@ -1563,7 +1752,8 @@ Alternatively, can write out each variable in the model:
 ```
 adonis_multi_rna_path = adonis(bray_rna_path_unstratified ~ site_name + sex + race + consent_age + diagnosis, data = metadata_rna)
 adonis_multi_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata_rna) 
 
@@ -1573,18 +1763,32 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4   0.33933 0.084834 0.95180 0.15419  0.499
-sex          1   0.09628 0.096283 1.08026 0.04375  0.393
-race         3   0.15885 0.052948 0.59406 0.07218  0.836
-consent_age  1   0.06621 0.066206 0.74281 0.03008  0.585
-diagnosis    2   0.11395 0.056976 0.63925 0.05178  0.933
-Residuals   16   1.42607 0.089129         0.64801       
+site_name    4   0.33933 0.084834 0.94530 0.15419  0.493
+sex          1   0.05461 0.054609 0.60851 0.02481  0.907
+race         3   0.16446 0.054820 0.61086 0.07473  0.787
+consent_age  1   0.06739 0.067385 0.75088 0.03062  0.585
+diagnosis    2   0.13903 0.069515 0.77461 0.06318  0.806
+Residuals   16   1.43587 0.089742         0.65246       
 Total       27   2.20069                  1.00000       
 ```
 
+#### Pairwise Bray-Curtis comparisons
+Pairwise comparisons of diagnosis in a univariable model
+
+```
+library(pairwiseAdonis)
+bray_rna_path_unstratified_mat = as.matrix(bray_rna_path_unstratified)
+pairwise.adonis(bray_rna_path_unstratified_mat, factors = metadata_rna$diagnosis, p.adjust.m = "BH")
+```
+```
+         pairs Df   SumsOfSqs   F.Model         R2 p.value p.adjusted sig
+1 CD vs nonIBD  1 0.018338280 1.0814873 0.05130033   0.311      0.804    
+2     CD vs UC  1 0.011695096 0.6518523 0.03317002   0.536      0.804    
+3 nonIBD vs UC  1 0.003735382 0.3904319 0.03427718   0.822      0.822    
+```
 
 
-## RNA/DNA pathway ratios
+## RNA DNA pathway ratios
 
 ### Feature table and metadata table creation and formatting
 
@@ -1602,7 +1806,8 @@ Check out `rna_dna_path`:
 Check the dimensions:
 ```
 dim(rna_dna_path)
-
+```
+```
 [1]    12 10598
 ```
 
@@ -1618,7 +1823,8 @@ Check out `rna_dna_path`:
 Check out the structure:
 ```
 str(rna_dna_path)
-
+```
+```
 'data.frame':	10598 obs. of  12 variables:
  $ MSM5LLDI   : num  0.973 0 0 0 0 ...
  $ MSM9VZL5   : num  1.23 0 0 4.08 0 ...
@@ -1638,7 +1844,8 @@ Everything is numeric; good to go.
 Check the output:
 ```
 rna_dna_path[1:8,1:2]
-                                                 
+```
+```
                                                                                                      MSM5LLDI MSM9VZL5
 1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis                                                0.9733041 1.231584
 1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis|g__Akkermansia.s__Akkermansia_muciniphila      0.0000000 0.000000
@@ -1651,14 +1858,12 @@ rna_dna_path[1:8,1:2]
 ```
 
 Minimize the metadata to just the samples available in these data:
-```
-dim(metadata)
-```
 
 Check the dimensions of `metadata` pre-subsetting:
 ```
 dim(metadata)
-
+```
+```
 [1] 96  5
 ```
 
@@ -1670,14 +1875,16 @@ metadata_rna_dna = subset(metadata, row.names(metadata) %in% names(rna_dna_path)
 Check the dimensions of the subsetted metadata:
 ```
 dim(metadata_rna_dna)
-
+```
+```
 [1] 12  5
 ```
 
 Check the output:
 ```
 metadata_rna_dna
-
+```
+```
                  site_name    sex  race consent_age diagnosis
 HSM6XRQB        Cincinnati Female White          16        CD
 HSM7J4LP        Cincinnati Female White          12        CD
@@ -1706,8 +1913,9 @@ rna_dna_path_unstratified = rna_dna_path[tmp.ind,]
 ```
 Check the output:
 ```
-row.names(rna_dna_path_unstratified)
-
+row.names(rna_dna_path_unstratified)[1:10]
+```
+```
   [1] "1CMET2-PWY: N10-formyl-tetrahydrofolate biosynthesis"                                                          
   [2] "3-HYDROXYPHENYLACETATE-DEGRADATION-PWY: 4-hydroxyphenylacetate degradation"                                    
   [3] "7ALPHADEHYDROX-PWY: cholate degradation (bacteria, anaerobic)"                                                 
@@ -1728,7 +1936,8 @@ rm(tmp.ind)
 Now that we have sucessfully unstratified `rna_dna_path`, let's check the sample sums (colSums):
 ```
 colSums(rna_dna_path_unstratified)
-
+```
+```
    MSM5LLDI    MSM9VZL5    PSM6XBRK    PSMA265X    MSM79H8D    PSM7J4EF 
   208.80878   306.06509   175.91123   403.28804   297.47223   184.13486 
 ...
@@ -1745,7 +1954,8 @@ Only keep RNA/DNA pathways that passed filtering for DNA pathways:
 Check the dimensions of RNA/DNA pathways pre-filtering:
 ```
 dim(rna_dna_path_unstratified)
-
+```
+```
 [1] 472  12
 ```
 Filter:
@@ -1755,13 +1965,15 @@ rna_dna_path_unstratified_filt = subset(rna_dna_path_unstratified, row.names(rna
 Check the dimensions of RNA/DNA pathways post-filtering:
 ```
 dim(rna_dna_path_unstratified_filt)
-
+```
+```
 [1] 309  12
 ```
 Check the dimensions of dna pathways post-filtering to make sure they line up:
 ```
 dim(dna_path_unstratified_filt)
-
+```
+```
 [1]  96 309
 ```
 Yes, they have the same number of pathways.
@@ -1773,13 +1985,39 @@ rna_dna_path_unstratified_filt = data.frame(t(rna_dna_path_unstratified_filt), c
 rna_dna_path_unstratified = data.frame(t(rna_dna_path_unstratified), check.names = F)
 ```
 
+Check to make sure the sample names are in the same order in both the metadata and the RNA/DNA pathways dataframe:
+```
+row.names(metadata_rna_dna) == row.names(rna_dna_path_unstratified_filt)
+```
+```
+ [1] FALSE FALSE FALSE FALSE  TRUE FALSE  TRUE FALSE FALSE FALSE FALSE FALSE
+ ```
+They don't match, so let's match them up.
+
+ ```
+rna_dna_path_unstratified_filt = rna_dna_path_unstratified_filt[match(row.names(metadata_rna_dna), row.names(rna_dna_path_unstratified_filt)),]
+```
+```
+row.names(metadata_rna_dna) == row.names(rna_dna_path_unstratified_filt)
+```
+```
+ [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+```
+Good to go now.
+
+>NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there just assign them in R with the following code:
+>```
+>metadata_rna_dna = read.csv(file = "metadata_rna_dna.csv", header = T, row.names = 1, check.names = FALSE)
+>rna_dna_path_unstratified_filt = read.csv(file = "rna_dna_path_unstratified_filt.csv", header = T, row.names = 1, check.names = FALSE)
+>```
+
 log transform the RNA/DNA ratio:
 ```
 rna_dna_path_unstratified_filt_log = log2(rna_dna_path_unstratified_filt + 1)
 ```
 
 
-### Beta Diversity: PERMANOVA tests using Euclidean distances
+### Beta Diversity PERMANOVA tests using Euclidean distances
 
 Calculate Euclidean distances:
 ```
@@ -1797,7 +2035,8 @@ for (col in names(metadata_rna_dna)){
   adonis_univ <- adonis(as.formula(paste("euclidean_rna_dna_path_unstratified ~ ", col)), data = metadata_rna_dna)
   print(adonis_univ)
 }
-
+```
+```
 Call:
 adonis(formula = as.formula(paste("euclidean_rna_dna_path_unstratified ~ ",      col)), data = metadata_rna_dna) 
 
@@ -1806,10 +2045,12 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs MeanSqs F.Model     R2 Pr(>F)
-site_name  2    257.63  128.82  1.0093 0.1832  0.418
-Residuals  9   1148.66  127.63         0.8168       
-Total     11   1406.29                 1.0000       
+          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
+site_name  2    365.27  182.63  1.5789 0.25974  0.022 *
+Residuals  9   1041.03  115.67         0.74026         
+Total     11   1406.29                 1.00000         
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Call:
 adonis(formula = as.formula(paste("euclidean_rna_dna_path_unstratified ~ ",      col)), data = metadata_rna_dna) 
@@ -1820,10 +2061,9 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-sex        1    148.46  148.46  1.1803 0.10557  0.204
-Residuals 10   1257.84  125.78         0.89443       
+sex        1    148.92  148.91  1.1843 0.10589  0.204
+Residuals 10   1257.38  125.74         0.89411       
 Total     11   1406.29                 1.00000       
-
 Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
   contrasts can be applied only to factors with 2 or more levels
 ```
@@ -1835,7 +2075,8 @@ Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) :
 
 ```
 metadata_rna_dna
-
+```
+```
                  site_name    sex  race consent_age diagnosis
 HSM6XRQB        Cincinnati Female White          16        CD
 HSM7J4LP        Cincinnati Female White          12        CD
@@ -1851,13 +2092,14 @@ PSM7J4EF    MGH Pediatrics   Male White          15        CD
 PSMA265X    MGH Pediatrics Female White          16        UC
 ```
 
-We only have one race now in this dataset, so let's remove that column from the metadata in the formula call. This wouldn't be a problem in the one-by-one method below, but is in the loop that goes through each column one at a time. Rememeber how we did this before for the taxonomy data in the alpha diversity models?
+We only have one race now in this dataset, so let's remove that column from the metadata in the formula call. This wouldn't be a problem in the one-by-one method below, but is in the loop that goes through each column one at a time. Remember how we did this before for the taxonomy data in the alpha diversity models?
 ```
 for (col in names(metadata_rna_dna)[-3]){
   adonis_univ <- adonis(as.formula(paste("euclidean_rna_dna_path_unstratified ~ ", col)), data = metadata_rna_dna[-3])
   print(adonis_univ)
 }
-
+```
+```
 Call:
 adonis(formula = as.formula(paste("euclidean_rna_dna_path_unstratified ~ ",      col)), data = metadata_rna_dna[-3]) 
 
@@ -1866,10 +2108,12 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs MeanSqs F.Model     R2 Pr(>F)
-site_name  2    257.63  128.82  1.0093 0.1832  0.424
-Residuals  9   1148.66  127.63         0.8168       
-Total     11   1406.29                 1.0000       
+          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
+site_name  2    365.27  182.63  1.5789 0.25974  0.017 *
+Residuals  9   1041.03  115.67         0.74026         
+Total     11   1406.29                 1.00000         
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 
 Call:
 adonis(formula = as.formula(paste("euclidean_rna_dna_path_unstratified ~ ",      col)), data = metadata_rna_dna[-3]) 
@@ -1880,8 +2124,8 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-sex        1    148.46  148.46  1.1803 0.10557  0.208
-Residuals 10   1257.84  125.78         0.89443       
+sex        1    148.92  148.91  1.1843 0.10589  0.217
+Residuals 10   1257.38  125.74         0.89411       
 Total     11   1406.29                 1.00000       
 
 Call:
@@ -1893,8 +2137,8 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-consent_age  1    123.86  123.86 0.96584 0.08808  0.457
-Residuals   10   1282.43  128.24         0.91192       
+consent_age  1    152.54  152.54  1.2167 0.10847  0.186
+Residuals   10   1253.75  125.38         0.89153       
 Total       11   1406.29                 1.00000       
 
 Call:
@@ -1905,10 +2149,10 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    332.89  166.44  1.3956 0.23671  0.056 .
-Residuals  9   1073.41  119.27         0.76329         
-Total     11   1406.29                 1.00000         
+          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
+diagnosis  2    478.92  239.46  2.3239 0.34056  0.001 ***
+Residuals  9    927.37  103.04         0.65944           
+Total     11   1406.29                 1.00000           
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
@@ -1917,7 +2161,8 @@ Alternatively, can do it one-by-one:
 ```
 adonis_site_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ site_name, data = metadata_rna_dna)
 adonis_site_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ site_name,      data = metadata_rna_dna) 
 
@@ -1926,15 +2171,18 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs MeanSqs F.Model     R2 Pr(>F)
-site_name  2    257.63  128.82  1.0093 0.1832  0.394
-Residuals  9   1148.66  127.63         0.8168       
-Total     11   1406.29                 1.0000   
+          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
+site_name  2    365.27  182.63  1.5789 0.25974  0.012 *
+Residuals  9   1041.03  115.67         0.74026         
+Total     11   1406.29                 1.00000         
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 ```
 adonis_sex_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ sex, data = metadata_rna_dna)
 adonis_sex_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ sex, data = metadata_rna_dna) 
 
@@ -1944,14 +2192,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
           Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-sex        1    148.46  148.46  1.1803 0.10557  0.206
-Residuals 10   1257.84  125.78         0.89443       
-Total     11   1406.29                 1.00000    
+sex        1    148.92  148.91  1.1843 0.10589  0.196
+Residuals 10   1257.38  125.74         0.89411       
+Total     11   1406.29                 1.00000       
 ```
 ```
 adonis_age_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ consent_age, data = metadata_rna_dna)
 adonis_age_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ consent_age,      data = metadata_rna_dna) 
 
@@ -1961,14 +2210,15 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-consent_age  1    123.86  123.86 0.96584 0.08808  0.434
-Residuals   10   1282.43  128.24         0.91192       
-Total       11   1406.29                 1.00000    
+consent_age  1    152.54  152.54  1.2167 0.10847  0.181
+Residuals   10   1253.75  125.38         0.89153       
+Total       11   1406.29                 1.00000       
 ```
 ```
 adonis_diagnosis_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ diagnosis, data = metadata_rna_dna)
 adonis_diagnosis_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ diagnosis,      data = metadata_rna_dna) 
 
@@ -1977,10 +2227,10 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    332.89  166.44  1.3956 0.23671   0.06 .
-Residuals  9   1073.41  119.27         0.76329         
-Total     11   1406.29                 1.00000         
+          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
+diagnosis  2    478.92  239.46  2.3239 0.34056  0.001 ***
+Residuals  9    927.37  103.04         0.65944           
+Total     11   1406.29                 1.00000           
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
@@ -1991,7 +2241,8 @@ Can do it without being verbose:
 ```
 adonis_multi_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ ., data = metadata_rna_dna[-3])
 adonis_multi_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ ., data = metadata_rna_dna[-3]) 
 
@@ -2000,20 +2251,23 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-site_name    2    257.63  128.82 1.00288 0.18320  0.446
-sex          1    128.11  128.11 0.99736 0.09110  0.420
-consent_age  1    112.95  112.95 0.87936 0.08032  0.616
-diagnosis    2    265.36  132.68 1.03293 0.18869  0.407
-Residuals    5    642.24  128.45         0.45669       
-Total       11   1406.29                 1.00000       
+            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
+site_name    2    365.27 182.633 1.78876 0.25974  0.011 *
+sex          1    139.76 139.756 1.36880 0.09938  0.106  
+consent_age  1     87.34  87.337 0.85541 0.06210  0.615  
+diagnosis    2    303.43 151.715 1.48594 0.21577  0.050 *
+Residuals    5    510.50 102.100         0.36301         
+Total       11   1406.29                 1.00000         
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
 Alternatively, can write out each variable in the model:
 ```
 adonis_multi_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ site_name + sex + consent_age + diagnosis, data = metadata_rna_dna)
 adonis_multi_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ site_name +      sex + consent_age + diagnosis, data = metadata_rna_dna) 
 
@@ -2022,24 +2276,44 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-site_name    2    257.63  128.82 1.00288 0.18320  0.462
-sex          1    128.11  128.11 0.99736 0.09110  0.436
-consent_age  1    112.95  112.95 0.87936 0.08032  0.604
-diagnosis    2    265.36  132.68 1.03293 0.18869  0.432
-Residuals    5    642.24  128.45         0.45669       
-Total       11   1406.29                 1.00000       
+            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)   
+site_name    2    365.27 182.633 1.78876 0.25974  0.009 **
+sex          1    139.76 139.756 1.36880 0.09938  0.126   
+consent_age  1     87.34  87.337 0.85541 0.06210  0.656   
+diagnosis    2    303.43 151.715 1.48594 0.21577  0.054 . 
+Residuals    5    510.50 102.100         0.36301          
+Total       11   1406.29                 1.00000          
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-Diagnosis goes from being significant in the univariable model to non-significant in the multivariable.
+Diagnosis goes from being significant in the univariable model to near non-significant in the multivariable.
+
+#### Pairwise Euclidean comparisons
+Pairwise comparisons of diagnosis in a univariable model
+
+```
+library(pairwiseAdonis)
+euclidean_rna_dna_path_unstratified_mat = as.matrix(euclidean_rna_dna_path_unstratified)
+pairwise.adonis(euclidean_rna_dna_path_unstratified_mat, factors = metadata_rna_dna$diagnosis, p.adjust.m = "BH")
+```
+```
+'nperm' >= set of all permutations: complete enumeration.
+Set of permutations < 'minperm'. Generating entire set.
+         pairs Df  SumsOfSqs  F.Model        R2   p.value p.adjusted sig
+1 CD vs nonIBD  1 0.03970044 5.395477 0.4027835 0.0030000  0.0090000   *
+2     CD vs UC  1 0.01941921 2.108531 0.2600386 0.0660000  0.0990000    
+3 nonIBD vs UC  1 0.01923794 1.947107 0.3274041 0.1333333  0.1333333    
+```
 
 
 Now let's look at all of the PERMANOVA results together:
 ```
 adonis_multi_tax
-
+```
+```
 Call:
-adonis(formula = bray_species ~ site_name + sex + race + consent_age +      diagnosis, data = metadata) 
+adonis(formula = bray_species ~ ., data = metadata) 
 
 Permutation: free
 Number of permutations: 999
@@ -2048,10 +2322,10 @@ Terms added sequentially (first to last)
 
             Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
 site_name    4    1.6651 0.41628  1.4195 0.05767  0.015 *
-sex          1    0.4848 0.48479  1.6531 0.01679  0.051 .
-race         3    0.8897 0.29658  1.0113 0.03081  0.452  
-consent_age  1    0.3545 0.35448  1.2088 0.01228  0.227  
-diagnosis    2    0.8470 0.42349  1.4441 0.02933  0.041 *
+sex          1    0.4848 0.48479  1.6531 0.01679  0.038 *
+race         3    0.8897 0.29658  1.0113 0.03081  0.433  
+consent_age  1    0.3545 0.35448  1.2088 0.01228  0.240  
+diagnosis    2    0.8470 0.42349  1.4441 0.02933  0.046 *
 Residuals   84   24.6335 0.29326         0.85312         
 Total       95   28.8747                 1.00000         
 ---
@@ -2059,7 +2333,8 @@ Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’
 ```
 ```
 adonis_multi_dna_path
-
+```
+```
 Call:
 adonis(formula = bray_dna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata) 
 
@@ -2069,17 +2344,18 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4    0.1763 0.044076  1.1105 0.04646  0.294
-sex          1    0.0311 0.031101  0.7836 0.00820  0.580
-race         3    0.1243 0.041425  1.0437 0.03275  0.409
-consent_age  1    0.0293 0.029283  0.7378 0.00772  0.636
-diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.194
+site_name    4    0.1763 0.044076  1.1105 0.04646  0.313
+sex          1    0.0311 0.031101  0.7836 0.00820  0.585
+race         3    0.1243 0.041425  1.0437 0.03275  0.384
+consent_age  1    0.0293 0.029283  0.7378 0.00772  0.622
+diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.219
 Residuals   84    3.3339 0.039690         0.87852       
 Total       95    3.7950                  1.00000       
 ```
 ```
 adonis_multi_rna_path
-
+```
+```
 Call:
 adonis(formula = bray_rna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata_rna) 
 
@@ -2089,17 +2365,18 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4   0.33933 0.084834 0.95180 0.15419  0.499
-sex          1   0.09628 0.096283 1.08026 0.04375  0.393
-race         3   0.15885 0.052948 0.59406 0.07218  0.836
-consent_age  1   0.06621 0.066206 0.74281 0.03008  0.585
-diagnosis    2   0.11395 0.056976 0.63925 0.05178  0.933
-Residuals   16   1.42607 0.089129         0.64801       
+site_name    4   0.33933 0.084834 0.94530 0.15419  0.493
+sex          1   0.05461 0.054609 0.60851 0.02481  0.907
+race         3   0.16446 0.054820 0.61086 0.07473  0.787
+consent_age  1   0.06739 0.067385 0.75088 0.03062  0.585
+diagnosis    2   0.13903 0.069515 0.77461 0.06318  0.806
+Residuals   16   1.43587 0.089742         0.65246       
 Total       27   2.20069                  1.00000       
 ```
 ```
 adonis_multi_rna_dna_path
-
+```
+```
 Call:
 adonis(formula = euclidean_rna_dna_path_unstratified ~ site_name +      sex + consent_age + diagnosis, data = metadata_rna_dna) 
 
@@ -2108,16 +2385,18 @@ Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-site_name    2    257.63  128.82 1.00288 0.18320  0.462
-sex          1    128.11  128.11 0.99736 0.09110  0.436
-consent_age  1    112.95  112.95 0.87936 0.08032  0.604
-diagnosis    2    265.36  132.68 1.03293 0.18869  0.432
-Residuals    5    642.24  128.45         0.45669       
-Total       11   1406.29                 1.00000       
+            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)   
+site_name    2    365.27 182.633 1.78876 0.25974  0.009 **
+sex          1    139.76 139.756 1.36880 0.09938  0.126   
+consent_age  1     87.34  87.337 0.85541 0.06210  0.656   
+diagnosis    2    303.43 151.715 1.48594 0.21577  0.054 . 
+Residuals    5    510.50 102.100         0.36301          
+Total       11   1406.29                 1.00000          
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-* Question: What are some possible reasons the taxonomy data gives the only significant results?
+* Question: What are some possible reasons the taxonomy data gives the only significant results (aside from the RNA/DNA ratio data that could be misleading due to low n)?
 
 
 # Mantel tests
