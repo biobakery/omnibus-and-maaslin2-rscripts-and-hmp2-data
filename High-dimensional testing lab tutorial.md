@@ -343,14 +343,14 @@ row.names(metadata) == row.names(species)
 
 ### Alpha diversity
 
+* Question: What is alpha diversity and why is it important? 
+
 Using unfiltered species data, we will calculate a few different alpha diversity metrics:
 ```
 shannon = data.frame(diversity(species, index = "shannon"))
 simpson = data.frame(diversity(species, index = "simpson"))
 invsimpson = data.frame(diversity(species, index = "invsimpson"))
 ```
-
-* Question: What is alpha diversity and why is it important? 
 
 Merge all into one dataframe:
 ```
@@ -536,9 +536,9 @@ diagnosis  2  0.4046 0.20231  0.6692 0.5146
 Residuals 93 28.1163 0.30233    
 ```
 
-* Question: What are univariable and multivariable tests and what benefit do both provide?
-
 #### Shannon alpha diversity Multivariable
+
+* Question: What are univariable and multivariable tests and what benefit do both provide?
 
 Can do it without being verbose:
 ```
@@ -1150,12 +1150,9 @@ Residuals   84    3.3339 0.039690         0.87852
 Total       95    3.7950                  1.00000       
 ```
 
-
 * Question: Wait a minute! Diagnosis was near significant in the univariable model, but is now quite non-significant in the multivariable model. What happened?
 
-
 Alternatively, can write out each variable in the model like above in the taxonomy section.
-
 
 * Exercise: Run the same model a few times and compare the results.
     * Question: Are you seeing the same results across runs? If not, why is this?
@@ -1199,9 +1196,7 @@ dim(rna_path)
 [1]   28 6066
 ```
 
-
 * Question: What is a possible reason for this rna data having less samples than the dna data?
-
 
 Remove metadata and keep only pathways and transpose the data:
 ```
@@ -1551,7 +1546,6 @@ Total       27   2.20069                  1.00000
 
 Alternatively, can write out each variable in the model like in the taxonomy section.
 
-
 #### Pairwise Bray-Curtis comparisons
 Pairwise comparisons of diagnosis in a univariable model
 
@@ -1846,7 +1840,6 @@ Total     11   1406.29                 1.00000
 Error in `contrasts<-`(`*tmp*`, value = contr.funs[1 + isOF[nn]]) : 
   contrasts can be applied only to factors with 2 or more levels
 ```
-
 
 * Question: We got an error, what could be the cause?
     * Hint: Let's investigate the metadata for this set of samples again.
