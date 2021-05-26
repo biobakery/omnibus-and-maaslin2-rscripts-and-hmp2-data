@@ -63,6 +63,10 @@ tax = read.csv(file = "./Data/taxonomic_profiles_pcl_week0.csv", header = T, row
 
 Check out `tax`:
 
+```
+tax[1:10,1:10]
+```
+
 Check the dimensions:
 ```
 dim(tax)
@@ -1117,99 +1121,7 @@ Total     95    3.7950                  1.00000
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-Alternatively, can do it one-by-one:
-```
-adonis_site_dna_path = adonis(bray_dna_path_unstratified ~ site_name, data = metadata)
-adonis_site_dna_path
-```
-```
-Call:
-adonis(formula = bray_dna_path_unstratified ~ site_name, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name  4    0.1763 0.044076  1.1084 0.04646    0.3
-Residuals 91    3.6187 0.039765         0.95354       
-Total     95    3.7950                  1.00000      
-```
-```
-adonis_sex_dna_path = adonis(bray_dna_path_unstratified ~ sex, data = metadata)
-adonis_sex_dna_path
-```
-```
-Call:
-adonis(formula = bray_dna_path_unstratified ~ sex, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
-sex        1    0.0383 0.038313 0.95867 0.0101  0.431
-Residuals 94    3.7566 0.039964         0.9899       
-Total     95    3.7950                  1.0000            
-```
-```
-adonis_age_dna_path = adonis(bray_dna_path_unstratified ~ consent_age, data = metadata)
-adonis_age_dna_path
-```
-```
-Call:
-adonis(formula = bray_dna_path_unstratified ~ consent_age, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-consent_age  1    0.0367 0.036663   0.917 0.00966  0.459
-Residuals   94    3.7583 0.039982         0.99034       
-Total       95    3.7950                  1.00000      
-```
-```
-adonis_race_dna_path = adonis(bray_dna_path_unstratified ~ race, data = metadata)
-adonis_race_dna_path
-```
-```
-Call:
-adonis(formula = bray_dna_path_unstratified ~ race, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-race       3    0.1211 0.040381  1.0112 0.03192  0.385
-Residuals 92    3.6738 0.039933         0.96808       
-Total     95    3.7950                  1.00000       
-```
-```
-adonis_diagnosis_dna_path = adonis(bray_dna_path_unstratified ~ diagnosis, data = metadata)
-adonis_diagnosis_dna_path
-```
-```
-Call:
-adonis(formula = bray_dna_path_unstratified ~ diagnosis, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    0.1327 0.066335  1.6845 0.03496  0.056 .
-Residuals 93    3.6623 0.039379         0.96504         
-Total     95    3.7950                  1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
+Alternatively, can do it one-by-one like above in the taxonomy section.
 
 
 #### Multivariable
@@ -1242,29 +1154,8 @@ Total       95    3.7950                  1.00000
 * Question: Wait a minute! Diagnosis was near significant in the univariable model, but is now quite non-significant in the multivariable model. What happened?
 
 
-Alternatively, can write out each variable in the model:
-```
-adonis_multi_dna_path = adonis(bray_dna_path_unstratified ~ site_name + sex + race + consent_age + diagnosis, data = metadata)
-adonis_multi_dna_path
-```
-```
-Call:
-adonis(formula = bray_dna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata) 
+Alternatively, can write out each variable in the model like above in the taxonomy section.
 
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4    0.1763 0.044076  1.1105 0.04646  0.313
-sex          1    0.0311 0.031101  0.7836 0.00820  0.585
-race         3    0.1243 0.041425  1.0437 0.03275  0.384
-consent_age  1    0.0293 0.029283  0.7378 0.00772  0.622
-diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.219
-Residuals   84    3.3339 0.039690         0.87852       
-Total       95    3.7950                  1.00000       
-```
 
 * Exercise: Run the same model a few times and compare the results.
     * Question: Are you seeing the same results across runs? If not, why is this?
@@ -1273,7 +1164,6 @@ Total       95    3.7950                  1.00000
 Pairwise comparisons of diagnosis in a univariable model
 
 ```
-library(pairwiseAdonis)
 bray_dna_path_unstratified_mat = as.matrix(bray_dna_path_unstratified)
 pairwise.adonis(bray_dna_path_unstratified_mat, factors = metadata$diagnosis, p.adjust.m = "BH")
 ```
@@ -1556,99 +1446,10 @@ Error in G * t(hat) : non-conformable arrays
     * Hint: Check the formula call and remember what we subsetted for this rna data.
 
 
-Alternatively, can do it one-by-one:
-```
-adonis_site_rna_path = adonis(bray_rna_path_unstratified ~ site_name, data = metadata_rna)
-adonis_site_rna_path
-```
-```
-Call:
-adonis(formula = bray_rna_path_unstratified ~ site_name, data = metadata_rna) 
+Alternatively, can do it one-by-one like in the taxonomy section.
 
-Permutation: free
-Number of permutations: 999
 
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name  4   0.33933 0.084834  1.0482 0.15419  0.336
-Residuals 23   1.86136 0.080929         0.84581       
-Total     27   2.20069                  1.00000       
-```
-```
-adonis_sex_rna_path = adonis(bray_rna_path_unstratified ~ sex, data = metadata_rna)
-adonis_sex_rna_path
-```
-```
-Call:
-adonis(formula = bray_rna_path_unstratified ~ sex, data = metadata_rna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model     R2 Pr(>F)
-sex        1    0.0823 0.082297  1.0101 0.0374  0.426
-Residuals 26    2.1184 0.081477         0.9626       
-Total     27    2.2007                  1.0000       
-```
-```
-adonis_age_rna_path = adonis(bray_rna_path_unstratified ~ consent_age, data = metadata_rna)
-adonis_age_rna_path
-```
-```
-Call:
-adonis(formula = bray_rna_path_unstratified ~ consent_age, data = metadata_rna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-consent_age  1   0.08368 0.083678  1.0277 0.03802  0.291
-Residuals   26   2.11701 0.081424         0.96198       
-Total       27   2.20069                  1.00000       
-```
-```
-adonis_race_rna_path = adonis(bray_rna_path_unstratified ~ race, data = metadata_rna)
-adonis_race_rna_path
-```
-```
-Call:
-adonis(formula = bray_rna_path_unstratified ~ race, data = metadata_rna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-race       3   0.13184 0.043945 0.50979 0.05991  0.904
-Residuals 24   2.06886 0.086202         0.94009       
-Total     27   2.20069                  1.00000       
-```
-```
-adonis_diagnosis_rna_path = adonis(bray_rna_path_unstratified ~ diagnosis, data = metadata_rna)
-adonis_diagnosis_rna_path
-```
-```
-Call:
-adonis(formula = bray_rna_path_unstratified ~ diagnosis, data = metadata_rna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-diagnosis  2   0.11062 0.055308 0.66155 0.05026   0.92
-Residuals 25   2.09008 0.083603         0.94974       
-Total     27   2.20069                  1.00000       
-```
-
-Solution to the for loop question earlier:
+Solution to the for loop question:
 ```
 for (col in names(metadata_rna)){
   adonis_univ <- adonis(as.formula(paste("bray_rna_path_unstratified ~ ", col)), data = metadata_rna)
@@ -1748,35 +1549,13 @@ Residuals   16   1.43587 0.089742         0.65246
 Total       27   2.20069                  1.00000       
 ```
 
-Alternatively, can write out each variable in the model:
-```
-adonis_multi_rna_path = adonis(bray_rna_path_unstratified ~ site_name + sex + race + consent_age + diagnosis, data = metadata_rna)
-adonis_multi_rna_path
-```
-```
-Call:
-adonis(formula = bray_rna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata_rna) 
+Alternatively, can write out each variable in the model like in the taxonomy section.
 
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4   0.33933 0.084834 0.94530 0.15419  0.493
-sex          1   0.05461 0.054609 0.60851 0.02481  0.907
-race         3   0.16446 0.054820 0.61086 0.07473  0.787
-consent_age  1   0.06739 0.067385 0.75088 0.03062  0.585
-diagnosis    2   0.13903 0.069515 0.77461 0.06318  0.806
-Residuals   16   1.43587 0.089742         0.65246       
-Total       27   2.20069                  1.00000       
-```
 
 #### Pairwise Bray-Curtis comparisons
 Pairwise comparisons of diagnosis in a univariable model
 
 ```
-library(pairwiseAdonis)
 bray_rna_path_unstratified_mat = as.matrix(bray_rna_path_unstratified)
 pairwise.adonis(bray_rna_path_unstratified_mat, factors = metadata_rna$diagnosis, p.adjust.m = "BH")
 ```
@@ -2157,83 +1936,8 @@ Total     11   1406.29                 1.00000
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-Alternatively, can do it one-by-one:
-```
-adonis_site_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ site_name, data = metadata_rna_dna)
-adonis_site_rna_dna_path
-```
-```
-Call:
-adonis(formula = euclidean_rna_dna_path_unstratified ~ site_name,      data = metadata_rna_dna) 
+Alternatively, can do it one-by-one like above in the taxonomy section.
 
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-site_name  2    365.27  182.63  1.5789 0.25974  0.012 *
-Residuals  9   1041.03  115.67         0.74026         
-Total     11   1406.29                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-```
-adonis_sex_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ sex, data = metadata_rna_dna)
-adonis_sex_rna_dna_path
-```
-```
-Call:
-adonis(formula = euclidean_rna_dna_path_unstratified ~ sex, data = metadata_rna_dna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-sex        1    148.92  148.91  1.1843 0.10589  0.196
-Residuals 10   1257.38  125.74         0.89411       
-Total     11   1406.29                 1.00000       
-```
-```
-adonis_age_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ consent_age, data = metadata_rna_dna)
-adonis_age_rna_dna_path
-```
-```
-Call:
-adonis(formula = euclidean_rna_dna_path_unstratified ~ consent_age,      data = metadata_rna_dna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-consent_age  1    152.54  152.54  1.2167 0.10847  0.181
-Residuals   10   1253.75  125.38         0.89153       
-Total       11   1406.29                 1.00000       
-```
-```
-adonis_diagnosis_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ diagnosis, data = metadata_rna_dna)
-adonis_diagnosis_rna_dna_path
-```
-```
-Call:
-adonis(formula = euclidean_rna_dna_path_unstratified ~ diagnosis,      data = metadata_rna_dna) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
-diagnosis  2    478.92  239.46  2.3239 0.34056  0.001 ***
-Residuals  9    927.37  103.04         0.65944           
-Total     11   1406.29                 1.00000           
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
 
 #### Multivariable
 
@@ -2262,38 +1966,15 @@ Total       11   1406.29                 1.00000
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
 
-Alternatively, can write out each variable in the model:
-```
-adonis_multi_rna_dna_path = adonis(euclidean_rna_dna_path_unstratified ~ site_name + sex + consent_age + diagnosis, data = metadata_rna_dna)
-adonis_multi_rna_dna_path
-```
-```
-Call:
-adonis(formula = euclidean_rna_dna_path_unstratified ~ site_name +      sex + consent_age + diagnosis, data = metadata_rna_dna) 
+Diagnosis goes from being very significant in the univariable model to nearly non-significant in the multivariable.
 
-Permutation: free
-Number of permutations: 999
+Alternatively, can write out each variable in the model like above in the taxonomy section.
 
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)   
-site_name    2    365.27 182.633 1.78876 0.25974  0.009 **
-sex          1    139.76 139.756 1.36880 0.09938  0.126   
-consent_age  1     87.34  87.337 0.85541 0.06210  0.656   
-diagnosis    2    303.43 151.715 1.48594 0.21577  0.054 . 
-Residuals    5    510.50 102.100         0.36301          
-Total       11   1406.29                 1.00000          
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-
-Diagnosis goes from being significant in the univariable model to near non-significant in the multivariable.
 
 #### Pairwise Euclidean comparisons
 Pairwise comparisons of diagnosis in a univariable model
 
 ```
-library(pairwiseAdonis)
 euclidean_rna_dna_path_unstratified_mat = as.matrix(euclidean_rna_dna_path_unstratified)
 pairwise.adonis(euclidean_rna_dna_path_unstratified_mat, factors = metadata_rna_dna$diagnosis, p.adjust.m = "BH")
 ```
@@ -2336,7 +2017,7 @@ adonis_multi_dna_path
 ```
 ```
 Call:
-adonis(formula = bray_dna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata) 
+adonis(formula = bray_dna_path_unstratified ~ ., data = metadata) 
 
 Permutation: free
 Number of permutations: 999
@@ -2344,11 +2025,11 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4    0.1763 0.044076  1.1105 0.04646  0.313
-sex          1    0.0311 0.031101  0.7836 0.00820  0.585
-race         3    0.1243 0.041425  1.0437 0.03275  0.384
-consent_age  1    0.0293 0.029283  0.7378 0.00772  0.622
-diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.219
+site_name    4    0.1763 0.044076  1.1105 0.04646  0.273
+sex          1    0.0311 0.031101  0.7836 0.00820  0.616
+race         3    0.1243 0.041425  1.0437 0.03275  0.394
+consent_age  1    0.0293 0.029283  0.7378 0.00772  0.620
+diagnosis    2    0.1001 0.050034  1.2606 0.02637  0.222
 Residuals   84    3.3339 0.039690         0.87852       
 Total       95    3.7950                  1.00000       
 ```
@@ -2357,7 +2038,7 @@ adonis_multi_rna_path
 ```
 ```
 Call:
-adonis(formula = bray_rna_path_unstratified ~ site_name + sex +      race + consent_age + diagnosis, data = metadata_rna) 
+adonis(formula = bray_rna_path_unstratified ~ ., data = metadata_rna) 
 
 Permutation: free
 Number of permutations: 999
@@ -2365,11 +2046,11 @@ Number of permutations: 999
 Terms added sequentially (first to last)
 
             Df SumsOfSqs  MeanSqs F.Model      R2 Pr(>F)
-site_name    4   0.33933 0.084834 0.94530 0.15419  0.493
-sex          1   0.05461 0.054609 0.60851 0.02481  0.907
-race         3   0.16446 0.054820 0.61086 0.07473  0.787
-consent_age  1   0.06739 0.067385 0.75088 0.03062  0.585
-diagnosis    2   0.13903 0.069515 0.77461 0.06318  0.806
+site_name    4   0.33933 0.084834 0.94530 0.15419  0.489
+sex          1   0.05461 0.054609 0.60851 0.02481  0.888
+race         3   0.16446 0.054820 0.61086 0.07473  0.819
+consent_age  1   0.06739 0.067385 0.75088 0.03062  0.558
+diagnosis    2   0.13903 0.069515 0.77461 0.06318  0.811
 Residuals   16   1.43587 0.089742         0.65246       
 Total       27   2.20069                  1.00000       
 ```
@@ -2378,20 +2059,20 @@ adonis_multi_rna_dna_path
 ```
 ```
 Call:
-adonis(formula = euclidean_rna_dna_path_unstratified ~ site_name +      sex + consent_age + diagnosis, data = metadata_rna_dna) 
+adonis(formula = euclidean_rna_dna_path_unstratified ~ ., data = metadata_rna_dna[-3]) 
 
 Permutation: free
 Number of permutations: 999
 
 Terms added sequentially (first to last)
 
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)   
-site_name    2    365.27 182.633 1.78876 0.25974  0.009 **
-sex          1    139.76 139.756 1.36880 0.09938  0.126   
-consent_age  1     87.34  87.337 0.85541 0.06210  0.656   
-diagnosis    2    303.43 151.715 1.48594 0.21577  0.054 . 
-Residuals    5    510.50 102.100         0.36301          
-Total       11   1406.29                 1.00000          
+            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
+site_name    2    365.27 182.633 1.78876 0.25974  0.011 *
+sex          1    139.76 139.756 1.36880 0.09938  0.106  
+consent_age  1     87.34  87.337 0.85541 0.06210  0.615  
+diagnosis    2    303.43 151.715 1.48594 0.21577  0.050 *
+Residuals    5    510.50 102.100         0.36301         
+Total       11   1406.29                 1.00000         
 ---
 Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
 ```
