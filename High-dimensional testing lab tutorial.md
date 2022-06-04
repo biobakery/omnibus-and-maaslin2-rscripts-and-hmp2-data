@@ -43,7 +43,6 @@ setwd("Tutorials/highdimtesting")
 Load the R packages needed:
 ```
 library(vegan)
-library(plyr)
 ```
 
 * Question: What are omnibus tests and how do they differ from featurewise tests? What types of plots do these omnibus tests complement?
@@ -115,14 +114,13 @@ str(metadata)
  $ diagnosis  : chr  "nonIBD" "CD" "nonIBD" "CD" ...
  ```
 
- Check for NAs in `metadata` that will later cause issues with the PERMANOVAs:
- ```
-count(is.na(metadata))
+Check for NAs in `metadata` that will later cause issues with the PERMANOVAs:
+```
+sapply(metadata, function(x) sum(is.na(x)))
 ```
 ```
-  x.site_name x.sex x.race x.consent_age x.diagnosis freq
-1       FALSE FALSE  FALSE         FALSE       FALSE   90
-2       FALSE FALSE  FALSE          TRUE       FALSE    6
+site_name         sex        race consent_age   diagnosis 
+        0           0           0           6           0 
 ```
 Age has 6 NA.
 
