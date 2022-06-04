@@ -419,23 +419,21 @@ CSM5MCV1_P 1.478073 0.6609943   2.949803 Cedars-Sinai Female White          20  
 
 Can do this with a for loop:
 ```
-for (col in names(alpha_met_df)[-c(2:3)]){
-  alpha_shannon_univ = anova(lm(as.formula(paste("Shannon ~ ", col)), data = alpha_met_df[-c(2:3)])) 
+for (col in names(metadata)){
+  alpha_shannon_univ = anova(lm(as.formula(paste("Shannon ~ ", col)), data = alpha_met_df)) 
+  print(col)
   print(alpha_shannon_univ)
 }
 ```
 ```
-Analysis of Variance Table
-
-Response: Shannon
-          Df Sum Sq Mean Sq F value Pr(>F)
-Residuals 95 28.521 0.30022               
+[1] "site_name"
 Analysis of Variance Table
 
 Response: Shannon
           Df  Sum Sq Mean Sq F value Pr(>F)
 site_name  4  1.6732 0.41831  1.4179 0.2344
 Residuals 91 26.8477 0.29503               
+[1] "sex"
 Analysis of Variance Table
 
 Response: Shannon
@@ -443,19 +441,22 @@ Response: Shannon
 sex        1  0.9209 0.92088  3.1363 0.07981 .
 Residuals 94 27.6001 0.29362                  
 ---
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*â' 0.05 '.' 0.1 ' ' 1
+[1] "race"
 Analysis of Variance Table
 
 Response: Shannon
           Df  Sum Sq Mean Sq F value Pr(>F)
 race       3  0.9266 0.30886  1.0297 0.3832
 Residuals 92 27.5944 0.29994               
+[1] "consent_age"
 Analysis of Variance Table
 
 Response: Shannon
             Df  Sum Sq  Mean Sq F value Pr(>F)
 consent_age  1  0.0105 0.010538  0.0347 0.8525
 Residuals   94 28.5104 0.303302               
+[1] "diagnosis"
 Analysis of Variance Table
 
 Response: Shannon
@@ -465,74 +466,6 @@ Residuals 93 28.1163 0.30233
 ```
 
 * Question: Everyone likely knows what the Pr(>F) value means (the p-value), but what does the Df value tell us?
-
-
-Alternatively, can do it one-by-one:
-```
-shannon_site = anova(lm(Shannon ~ site_name, data = alpha_met_df))
-shannon_site
-```
-```
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value Pr(>F)
-site_name  4  1.6732 0.41831  1.4179 0.2344
-Residuals 91 26.8477 0.29503  
-```
-
-* Question: Why did we need to use `alpha_met_df[-c(2:3)]` instead of the entire `alpha_met_df` in the models performed with a for loop, but not here in the writing out one variable at a time models?
-
-```
-shannon_sex = anova(lm(Shannon ~ sex, data = alpha_met_df))
-shannon_sex
-```
-```
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value  Pr(>F)  
-sex        1  0.9209 0.92088  3.1363 0.07981 .
-Residuals 94 27.6001 0.29362                  
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-```
-shannon_race = anova(lm(Shannon ~ race, data = alpha_met_df))
-shannon_race
-```
-```
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value Pr(>F)
-race       3  0.9266 0.30886  1.0297 0.3832
-Residuals 92 27.5944 0.29994   
-```
-```
-shannon_age = anova(lm(Shannon ~ consent_age, data = alpha_met_df))
-shannon_age
-```
-```
-Analysis of Variance Table
-
-Response: Shannon
-            Df  Sum Sq  Mean Sq F value Pr(>F)
-consent_age  1  0.0105 0.010538  0.0347 0.8525
-Residuals   94 28.5104 0.303302   
-```
-```
-shannon_diagnosis = anova(lm(Shannon ~ diagnosis, data = alpha_met_df))
-shannon_diagnosis
-```
-```
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value Pr(>F)
-diagnosis  2  0.4046 0.20231  0.6692 0.5146
-Residuals 93 28.1163 0.30233    
-```
 
 #### Shannon alpha diversity Multivariable
 
