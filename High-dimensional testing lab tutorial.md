@@ -1,6 +1,6 @@
 # High-dimensional testing lab tutorial
 
-- [Omnibus tests on MGX and MTX data from the HMP2 baseline data](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
+- [Omnibus tests on MGX and MTX data from the HMP2 baseline only data](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
   * [MGX taxonomy](#mgx-taxonomy)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
     + [Alpha diversity](#alpha-diversity)
@@ -30,7 +30,7 @@
       - [Pairwise Euclidean comparisons](#pairwise-euclidean-comparisons)
 - [Mantel tests](#mantel-tests)
 
-# Omnibus tests on MGX and MTX data from the HMP2 baseline data
+# Omnibus tests on MGX and MTX data from the HMP2 baseline only data
 
 Set the working directory:
 ```
@@ -305,7 +305,7 @@ all(row.names(metadata) == row.names(species))
 
 * Question: What is alpha diversity, and why is it important? 
 
-Using the unfiltered species data, we will calculate a common alpha diversity index:
+Using the unfiltered species data, calculate a common alpha diversity index:
 ```
 alpha_div = as.data.frame(diversity(species, index = "shannon"))
 ```
@@ -364,43 +364,7 @@ for (col in names(metadata)){
 }
 ```
 ```
-[1] "site_name"
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value Pr(>F)
-site_name  4  1.6732 0.41831  1.4179 0.2344
-Residuals 91 26.8477 0.29503               
-[1] "sex"
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value  Pr(>F)  
-sex        1  0.9209 0.92088  3.1363 0.07981 .
-Residuals 94 27.6001 0.29362                  
----
-Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
-[1] "race"
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value Pr(>F)
-race       3  0.9266 0.30886  1.0297 0.3832
-Residuals 92 27.5944 0.29994               
-[1] "consent_age"
-Analysis of Variance Table
-
-Response: Shannon
-            Df  Sum Sq  Mean Sq F value Pr(>F)
-consent_age  1  0.0105 0.010538  0.0347 0.8525
-Residuals   94 28.5104 0.303302               
-[1] "diagnosis"
-Analysis of Variance Table
-
-Response: Shannon
-          Df  Sum Sq Mean Sq F value Pr(>F)
-diagnosis  2  0.4046 0.20231  0.6692 0.5146
-Residuals 93 28.1163 0.30233               
+BLOOP
 ```
 
 * Question: Everyone likely knows what the Pr(>F) value means (the p-value), but what does the Df value tell us?
@@ -430,270 +394,71 @@ BLOOP
 * Question: This can be expanded to include random effects with the `lme4` package. Is there anything in this demo data that might indicate a mixed model would be useful?
 
 ### Beta Diversity
-PERMANOVA tests using Bray-Curtis dissimilarity
 
-Calculate Bray-Curtis dissimilarity:
+* Question: What is beta diversity, and why is it important? 
+
+Using the filtered species table, calculate Bray-Curtis dissimilarity:
 ```
 bray_species = vegdist(species_filt, method = "bray")
 ```
 
-* Question: What makes Bray-Curtis dissimilarity good to use for this type of feature data?
+* Question: What makes Bray-Curtis dissimilarity a good index to use for this type of data? Do you know of other options?
 
 #### Univariable
+
+Unlike alpha diversity, beta diversity is defined between samples, and therefore, many common statistical tests are not usable. 
+
+* Question: Why bother with beta diversity then?
+
+PERMANOVA is the most common omnibus beta diversity test and is implemented as `adonis2` by the vegan package.
+Note that `adonis` is now officially deprecated and older code that uses this function may act strangely. 
+
+Run permanova and print the results:
+```
+set.seed(123)
+adonis_diagnosis_tax = adonis2(bray_species ~ diagnosis, data = metadata)
+adonis_diagnosis_tax
+```
+```
+BLOOP
+```
+As you can see, the results look quite similar to the more familiar ANOVA test.
+
+* Question: Why is a seed set before calling `adonis`? Try running it again without resetting the seed.
 
 Can do this with a for loop:
 ```
 for (col in names(metadata)){
-  adonis_univ <- adonis(as.formula(paste("bray_species ~ ", col)), data = metadata)
+  set.seed(123)
+  adonis_univ <- adonis2(as.formula(paste("bray_species ~ ", col)), data = metadata)
   print(adonis_univ)
 }
 ```
 ```
-Call:
-adonis(formula = as.formula(paste("bray_species ~ ", col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-site_name  4    1.6651 0.41628  1.3922 0.05767  0.016 *
-Residuals 91   27.2095 0.29901         0.94233         
-Total     95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Call:
-adonis(formula = as.formula(paste("bray_species ~ ", col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-sex        1    0.5925 0.59254  1.9694 0.02052  0.012 *
-Residuals 94   28.2821 0.30087         0.97948         
-Total     95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Call:
-adonis(formula = as.formula(paste("bray_species ~ ", col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-race       3    0.7778 0.25926 0.84891 0.02694  0.793
-Residuals 92   28.0969 0.30540         0.97306       
-Total     95   28.8747                 1.00000       
-
-Call:
-adonis(formula = as.formula(paste("bray_species ~ ", col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-consent_age  1    0.4683 0.46832  1.5497 0.01622  0.063 .
-Residuals   94   28.4063 0.30219         0.98378         
-Total       95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-
-Call:
-adonis(formula = as.formula(paste("bray_species ~ ", col)), data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    0.9399 0.46996  1.5646 0.03255  0.019 *
-Residuals 93   27.9347 0.30037         0.96745         
-Total     95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+BLOOP
 ```
 
 * Question: What does the R2 value tell us?
 
-Alternatively, can do it one-by-one:
-```
-adonis_site_tax = adonis(bray_species ~ site_name, data = metadata)
-adonis_site_tax
-```
-```
-Call:
-adonis(formula = bray_species ~ site_name, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-site_name  4    1.6651 0.41628  1.3922 0.05767  0.017 *
-Residuals 91   27.2095 0.29901         0.94233         
-Total     95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-```
-adonis_sex_tax = adonis(bray_species ~ sex, data = metadata)
-adonis_sex_tax
-```
-```
-Call:
-adonis(formula = bray_species ~ sex, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)   
-sex        1    0.5925 0.59254  1.9694 0.02052  0.009 **
-Residuals 94   28.2821 0.30087         0.97948          
-Total     95   28.8747                 1.00000          
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-```
-adonis_age_tax = adonis(bray_species ~ consent_age, data = metadata)
-adonis_age_tax
-```
-```
-Call:
-adonis(formula = bray_species ~ consent_age, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-consent_age  1    0.4683 0.46832  1.5497 0.01622   0.06 .
-Residuals   94   28.4063 0.30219         0.98378         
-Total       95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-```
-adonis_race_tax = adonis(bray_species ~ race, data = metadata)
-adonis_race_tax
-```
-```
-Call:
-adonis(formula = bray_species ~ race, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)
-race       3    0.7778 0.25926 0.84891 0.02694  0.808
-Residuals 92   28.0969 0.30540         0.97306       
-Total     95   28.8747                 1.00000 
-```
-```
-adonis_diagnosis_tax = adonis(bray_species ~ diagnosis, data = metadata)
-adonis_diagnosis_tax
-```
-```
-Call:
-adonis(formula = bray_species ~ diagnosis, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-          Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-diagnosis  2    0.9399 0.46996  1.5646 0.03255  0.023 *
-Residuals 93   27.9347 0.30037         0.96745         
-Total     95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-
 #### Multivariable
 
-Can do it without being verbose:
-```
-adonis_multi_tax = adonis(bray_species ~ ., data = metadata)
-adonis_multi_tax
-```
-```
-Call:
-adonis(formula = bray_species ~ ., data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-site_name    4    1.6651 0.41628  1.4195 0.05767  0.014 *
-sex          1    0.4848 0.48479  1.6531 0.01679  0.047 *
-race         3    0.8897 0.29658  1.0113 0.03081  0.433  
-consent_age  1    0.3545 0.35448  1.2088 0.01228  0.245  
-diagnosis    2    0.8470 0.42349  1.4441 0.02933  0.030 *
-Residuals   84   24.6335 0.29326         0.85312         
-Total       95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
-```
-
-Alternatively, can write out each variable in the model:
+BLOOP:
 ```
 adonis_multi_tax = adonis(bray_species ~ site_name + sex + race + consent_age + diagnosis, data = metadata)
 adonis_multi_tax
 ```
 ```
-Call:
-adonis(formula = bray_species ~ site_name + sex + race + consent_age + diagnosis, data = metadata) 
-
-Permutation: free
-Number of permutations: 999
-
-Terms added sequentially (first to last)
-
-            Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)  
-site_name    4    1.6651 0.41628  1.4195 0.05767  0.015 *
-sex          1    0.4848 0.48479  1.6531 0.01679  0.051 .
-race         3    0.8897 0.29658  1.0113 0.03081  0.452  
-consent_age  1    0.3545 0.35448  1.2088 0.01228  0.227  
-diagnosis    2    0.8470 0.42349  1.4441 0.02933  0.041 *
-Residuals   84   24.6335 0.29326         0.85312         
-Total       95   28.8747                 1.00000         
----
-Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+BLOOP
 ```
 
-#### Pairwise Bray-Curtis comparisons
-Pairwise comparisons of diagnosis in a univariable model
-
+Can use the same shorthand as with linear models:
 ```
-library(pairwiseAdonis)
-bray_species_mat = as.matrix(bray_species)
-pairwise.adonis(bray_species_mat, factors = metadata$diagnosis, p.adjust.m = "BH")
+adonis_multi_tax = adonis(bray_species ~ ., data = metadata)
+adonis_multi_tax
 ```
 ```
-         pairs Df   SumsOfSqs   F.Model         R2 p.value p.adjusted sig
-1 nonIBD vs CD  1 0.004509742 0.9319883 0.01332707   0.396      0.396    
-2 nonIBD vs UC  1 0.007473162 1.7057327 0.03502119   0.136      0.396    
-3     CD vs UC  1 0.005921838 1.1835337 0.01662651   0.269      0.396   
+BLOOP
 ```
-
 
 ## MGX pathways
 
