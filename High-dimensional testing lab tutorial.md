@@ -1,36 +1,36 @@
 # High-dimensional testing lab tutorial
 
-- [Omnibus tests on MGX and MTX data from the HMP2: Baseline only](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
+- [Omnibus tests on MGX and MTX data from the HMP2 baseline data](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
   * [MGX taxonomy](#mgx-taxonomy)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
     + [Alpha diversity](#alpha-diversity)
-      - [Shannon alpha diversity Univariable](#shannon-alpha-diversity-univariable)
-      - [Shannon alpha diversity Multivariable](#shannon-alpha-diversity-multivariable)
-    + [Beta Diversity PERMANOVA tests using Bray-Curtis dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity)
+      - [Univariable](#univariable)
+      - [Multivariable](#multivariable)
+    + [Beta Diversity](#beta-diversity)
       - [Univariable](#univariable)
       - [Multivariable](#multivariable)
       - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons)
   * [MGX pathways](#mgx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-1)
     + [Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity)
-      - [Univariable](#univariable-1)
-      - [Multivariable](#multivariable-1)
+      - [Univariable](#univariable-2)
+      - [Multivariable](#multivariable-2)
       - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons-1)
   * [MTX pathways](#mtx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-2)
     + [Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity-1)
-      - [Univariable](#univariable-2)
-      - [Multivariable](#multivariable-2)
+      - [Univariable](#univariable-3)
+      - [Multivariable](#multivariable-3)
       - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons-2)
   * [RNA DNA pathway ratios](#rna-dna-pathway-ratios)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-3)
     + [Beta Diversity PERMANOVA tests using Euclidean distances](#beta-diversity-permanova-tests-using-euclidean-distances)
-      - [Univariable](#univariable-3)
-      - [Multivariable](#multivariable-3)
+      - [Univariable](#univariable-4)
+      - [Multivariable](#multivariable-4)
       - [Pairwise Euclidean comparisons](#pairwise-euclidean-comparisons)
 - [Mantel tests](#mantel-tests)
 
-# Omnibus tests on MGX and MTX data from the HMP2: Baseline only
+# Omnibus tests on MGX and MTX data from the HMP2 baseline data
 
 Set the working directory:
 ```
@@ -251,8 +251,7 @@ colSums(species)
 ...
 ```
 
-For beta diversity (and feature-wise) calculations, we usually apply a prevalence/abundance filter to remove low level noise and improve power. 
-However, for alpha diversity, this will reduce the (possibly real) differences in complexity between samples.
+It is often useful to filter out low prevalence/abundance features in 'omics data, so we will make a filtered copy of the species table.
 
 Check the dimensions of species pre-filtering:
 ```
@@ -293,95 +292,73 @@ all(row.names(metadata) == row.names(species_filt))
 all(row.names(metadata) == row.names(species))
 ```
 
+* Question: Why perform this type of filtering? Are there situations were it might not be appropriate?
+
 >NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there assign them in R with the following code:
 >```
->metadata = read.csv(file = "metadata.csv", header = T, row.names = 1, check.names = FALSE)
->species = read.csv(file = "species.csv", header = T, row.names = 1, check.names = FALSE)
->species_filt = read.csv(file = "species_filt.csv", header = T, row.names = 1, check.names = FALSE)
+>metadata = read.csv(file = "metadata.csv", header = T, row.names = 1, check.names = F)
+>species = read.csv(file = "species.csv", header = T, row.names = 1, check.names = F)
+>species_filt = read.csv(file = "species_filt.csv", header = T, row.names = 1, check.names = F)
 >```
 
 ### Alpha diversity
 
-* Question: What is alpha diversity and why is it important? 
+* Question: What is alpha diversity, and why is it important? 
 
-Using unfiltered species data, we will calculate a few different alpha diversity metrics:
+Using the unfiltered species data, we will calculate a common alpha diversity index:
 ```
-shannon = data.frame(diversity(species, index = "shannon"))
-simpson = data.frame(diversity(species, index = "simpson"))
-invsimpson = data.frame(diversity(species, index = "invsimpson"))
+alpha_div = as.data.frame(diversity(species, index = "shannon"))
 ```
+You can check which indices the vegan package supports with `?diversity`. We often also use Inverse Simpson, which gives similar results. 
+However, there are several more you might see in the literature, with varying pros and cons, e.g. Chao1.
 
-Merge all into one dataframe:
-```
-alphadiv = cbind(shannon, simpson, invsimpson)
-```
 Check the output:
 ```
-head(alphadiv)
+head(alpha_div)
 ```
 ```
-         diversity.species..index....shannon.. diversity.species..index....simpson.. diversity.species..index....invsimpson..
-CSM67UH7                             1.7906860                             0.6360532                                 2.747654
-CSM79HHW                             2.5342475                             0.8963525                                 9.648086
-HSM67VDT                             2.2925910                             0.7982095                                 4.955635
-HSM6XRQB                             2.5677991                             0.8790000                                 8.264464
-HSM6XRR3                             2.2772366                             0.8455911                                 6.476311
-HSM7J4LP                             0.3959699                             0.1864280                                 1.229147
+BLOOP
 ```
 
 Rename the columns to shorter names:
 ```
-names(alphadiv) = c("Shannon", "Simpson", "InvSimpson")
-```
-Check the output:
-```
-head(alphadiv)
-```
-```
-           Shannon   Simpson InvSimpson
-CSM67UH7 1.7906860 0.6360532   2.747654
-CSM79HHW 2.5342475 0.8963525   9.648086
-HSM67VDT 2.2925910 0.7982095   4.955635
-HSM6XRQB 2.5677991 0.8790000   8.264464
-HSM6XRR3 2.2772366 0.8455911   6.476311
-HSM7J4LP 0.3959699 0.1864280   1.229147
+names(alpha_div) = c("shannon")
 ```
 
-Append metadata:
+Collate with the metadata, so that a single dataframe can be provided to upcoming statistical tests:
 ```
-alpha_met_df <- merge(alphadiv, metadata, by = "row.names")
+alpha_meta <- merge(alpha_div, metadata, by = "row.names")
+```
+Note that the `merge` function makes the old row names into new column. This might not be what you expect, but you can confirm with `?merge`.
+
+Restore the row names (sample IDs) and get rid of the column generated by the merge:
+```
+row.names(alpha_meta) = alpha_meta$Row.names
+alpha_meta$Row.names = NULL
 ```
 
-Make the samples the row names again:
+Confirm this looks as expected:
 ```
-row.names(alpha_met_df) = alpha_met_df$Row.names
-```
-
-Get rid of the Row.names column:
-```
-alpha_met_df$Row.names = NULL
-```
-Check the output:
-```
-head(alpha_met_df)
+head(alpha_meta)
 ```
 ```
-            Shannon   Simpson InvSimpson    site_name    sex  race consent_age diagnosis
-CSM5FZ3N_P 1.741766 0.6833787   3.158347 Cedars-Sinai Female White          43        CD
-CSM5FZ3T_P 1.634631 0.7566009   4.108479 Cedars-Sinai Female White          76        CD
-CSM5FZ4A_P 2.117305 0.8070880   5.183709 Cedars-Sinai Female White          47        UC
-CSM5MCTZ_P 2.665711 0.8731621   7.884076 Cedars-Sinai   Male White          32        UC
-CSM5MCU4_P 1.119533 0.3974255   1.659546 Cedars-Sinai Female White          53        CD
-CSM5MCV1_P 1.478073 0.6609943   2.949803 Cedars-Sinai Female White          20        CD
+BLOOP
 ```
 
+#### Univariable
 
-#### Shannon alpha diversity Univariable
+Alpha diversity is relatively well-behaved and generates a single value per sample, allowing for a number of statistical tests.
+Linear models are straightforward and can accommodate a large variety of experimental designs, so we will go with that.
 
-Can do this with a for loop:
+Run a linear model on diagnosis and return as an ANOVA table:
+```
+alpha_shannon_univ = anova(lm(Shannon ~ diagnosis, data = alpha_meta)) 
+```
+
+Can do this with a for loop to quickly get results for each metadata variable:
 ```
 for (col in names(metadata)){
-  alpha_shannon_univ = anova(lm(as.formula(paste("Shannon ~ ", col)), data = alpha_met_df)) 
+  alpha_shannon_univ = anova(lm(as.formula(paste("Shannon ~ ", col)), data = alpha_meta)) 
   print(col)
   print(alpha_shannon_univ)
 }
@@ -402,7 +379,7 @@ Response: Shannon
 sex        1  0.9209 0.92088  3.1363 0.07981 .
 Residuals 94 27.6001 0.29362                  
 ---
-Signif. codes:  0 '***' 0.001 '**' 0.01 '*â' 0.05 '.' 0.1 ' ' 1
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 [1] "race"
 Analysis of Variance Table
 
@@ -428,77 +405,39 @@ Residuals 93 28.1163 0.30233
 
 * Question: Everyone likely knows what the Pr(>F) value means (the p-value), but what does the Df value tell us?
 
-#### Shannon alpha diversity Multivariable
+#### Multivariable
 
 * Question: What are univariable and multivariable tests and what benefit do both provide?
 
-Can do it without being verbose:
+Try a model with the age and diagnosis:
 ```
-shannon_multi = anova(lm(Shannon ~ ., data = alpha_met_df[-c(2:3)]))
+shannon_multi = anova(lm(Shannon ~ consent_age + diagnosis, data = alpha_met_df))
 shannon_multi
 ```
 ```
-Analysis of Variance Table
-
-Response: Shannon
-            Df  Sum Sq Mean Sq F value Pr(>F)
-site_name    4  1.6732 0.41831  1.4118 0.2371
-sex          1  0.4001 0.40012  1.3504 0.2485
-race         3  0.6939 0.23130  0.7807 0.5080
-consent_age  1  0.7356 0.73559  2.4826 0.1189
-diagnosis    2  0.1294 0.06472  0.2184 0.8042
-Residuals   84 24.8887 0.29629  
+BLOOP
 ```
 
-Alternatively, can write out each variable in the model:
+If all variables in the file are used, there's a nice shorthand in R:
 ```
-shannon_multi = anova(lm(Shannon ~ site_name + sex + race + consent_age + diagnosis, data = alpha_met_df))
+shannon_multi = anova(lm(Shannon ~ ., data = alpha_meta))
 shannon_multi
 ```
 ```
-Analysis of Variance Table
-
-Response: Shannon
-            Df  Sum Sq Mean Sq F value Pr(>F)
-site_name    4  1.6732 0.41831  1.4118 0.2371
-sex          1  0.4001 0.40012  1.3504 0.2485
-race         3  0.6939 0.23130  0.7807 0.5080
-consent_age  1  0.7356 0.73559  2.4826 0.1189
-diagnosis    2  0.1294 0.06472  0.2184 0.8042
-Residuals   84 24.8887 0.29629           
+BLOOP
 ```
 
-* Exercise: Now run univariable models for diagnosis on the Simpson and Inverse Simpson metrics.
-    * Question: How might one easily do this with a shortcut in RStudio?
+* Question: This can be expanded to include random effects with the `lme4` package. Is there anything in this demo data that might indicate a mixed model would be useful?
 
-
-Now to look at all 3 measures together for diagnosis (univariable):
-```
-rbind(shannon_diagnosis, simpson_diagnosis, invsimpson_diagnosis)
-```
-```
-Analysis of Variance Table
-
-Response: Shannon
-           Df  Sum Sq Mean Sq F value Pr(>F)
-diagnosis   2    0.40  0.2023  0.6692 0.5146
-Residuals  93   28.12  0.3023               
-diagnosis1  2    0.01  0.0068  0.3803 0.6847
-Residuals1 93    1.67  0.0180               
-diagnosis2  2   12.64  6.3207  0.5316 0.5894
-Residuals2 93 1105.77 11.8900   
-```
-
-
-### Beta Diversity PERMANOVA tests using Bray-Curtis dissimilarity
+### Beta Diversity
+PERMANOVA tests using Bray-Curtis dissimilarity
 
 Calculate Bray-Curtis dissimilarity:
 ```
 bray_species = vegdist(species_filt, method = "bray")
 ```
 
-* Question: What makes Bray-Curtis dissimilarity a good metric to use for this type of feature data?
-
+* Question: What makes Bray-Curtis dissimilarity good to use for this type of feature data?
 
 #### Univariable
 
