@@ -1,6 +1,6 @@
 # High-dimensional testing lab tutorial
 
-- [Omnibus tests on mgx and mtx data from the HMP2. Baseline only data.](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
+- [Omnibus tests on MGX and MTX data from the HMP2: Baseline only data.](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
   * [MGX taxonomy](#mgx-taxonomy)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
     + [Alpha diversity](#alpha-diversity)
@@ -30,10 +30,7 @@
       - [Pairwise Euclidean comparisons](#pairwise-euclidean-comparisons)
 - [Mantel tests](#mantel-tests)
 
-<small><i><a href='http://ecotrust-canada.github.io/markdown-toc/'>Table of contents generated with markdown-toc</a></i></small>
-
-
-# Omnibus tests on mgx and mtx data from the HMP2. Baseline only data.
+# Omnibus tests on MGX and MTX data from the HMP2: Baseline only data.
 
 Set the working directory:
 ```
