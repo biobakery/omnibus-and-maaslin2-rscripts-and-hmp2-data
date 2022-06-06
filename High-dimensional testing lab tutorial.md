@@ -1,6 +1,6 @@
 # High-dimensional testing lab tutorial
 
-- [Omnibus tests on MGX and MTX data from the HMP2: Baseline only data.](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
+- [Omnibus tests on MGX and MTX data from the HMP2: Baseline only](#omnibus-tests-on-mgx-and-mtx-data-from-the-hmp2-baseline-only-data)
   * [MGX taxonomy](#mgx-taxonomy)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting)
     + [Alpha diversity](#alpha-diversity)
@@ -30,7 +30,7 @@
       - [Pairwise Euclidean comparisons](#pairwise-euclidean-comparisons)
 - [Mantel tests](#mantel-tests)
 
-# Omnibus tests on MGX and MTX data from the HMP2: Baseline only data.
+# Omnibus tests on MGX and MTX data from the HMP2: Baseline only
 
 Set the working directory:
 ```
@@ -42,26 +42,28 @@ Load the R packages needed:
 library(vegan)
 ```
 
-* Question: What are omnibus tests and how do they differ from featurewise tests? What types of plots do these omnibus tests complement?
+* Question: What are omnibus tests and how do they differ from featurewise tests? How might these complement each other?
 
 ## MGX taxonomy
 
 ### Feature table and metadata table creation and formatting
 
-Download the mgx taxonomy relative abundance data and put it into the data directory:
+Download the MGX taxonomy relative abundance data and put it into the data directory:
 ```
 download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/taxonomic_profiles_pcl_week0.csv", "./Data/taxonomic_profiles_pcl_week0.csv")
 ```
+
 Read the taxonomic relative abundance data into your R environment:
 ```
 tax = read.csv(file = "./Data/taxonomic_profiles_pcl_week0.csv", header = T, row.names = 1, check.names = FALSE)
 ```
 
-Check out `tax`:
-
+Take a look at `tax`:
 ```
 tax[1:10,1:10]
 ```
+
+* Question: Why not use head(tax)? Try it if you are unsure.
 
 Check the dimensions:
 ```
@@ -71,21 +73,14 @@ dim(tax)
 [1]   96 1484
 ```
 
-Extract the metadata from `tax`:
+Extract the metadata from `tax`, the first 5 columns in this file:
 ```
-metadata = data.frame(tax[1:5])
+metadata = tax[1:5]
 ```
 
-Check out `metadata`:
+* Question: What are the advantages and disadvantages of storing and accessing data like this?  
 
-Check the dimensions:
-```
-dim(metadata)
-```
-```
-[1] 96  5
-```
-Check the output:
+Take a look at `metadata`:
 ```
 head(metadata)
 ```
@@ -98,6 +93,7 @@ HSM6XRQB   Cincinnati Female White          16        CD
 HSM6XRR3   Cincinnati   Male White          13        CD
 HSM7J4LP   Cincinnati Female White          12        CD
 ```
+
 Check the structure:
 ```
 str(metadata)
@@ -111,7 +107,7 @@ str(metadata)
  $ diagnosis  : chr  "nonIBD" "CD" "nonIBD" "CD" ...
  ```
 
-Check for NAs in `metadata` that will later cause issues with the PERMANOVAs:
+Check for NAs in `metadata`, since these will cause issues later in PERMANOVA tests:
 ```
 sapply(metadata, function(x) sum(is.na(x)))
 ```
@@ -119,58 +115,30 @@ sapply(metadata, function(x) sum(is.na(x)))
 site_name         sex        race consent_age   diagnosis 
         0           0           0           6           0 
 ```
+
 Age has 6 NA.
 
-If this was a discrete variable we could just classify the NAs as Unknown and keep them in the model, but since age is a continuous variable typically we would either remove those from the data or impute. 
+If this was a discrete variable we could classify the NAs as "unknown" and keep them in the model, but since age is a continuous variable typically we would either remove those from the data or impute. 
 
-In this case let's impute the median in order to keep samples:
+* Question: What is the main drawback of keeping NA values for discrete variables? Is there a case where this is totally justified?
 
-Check out unique ages:
-```
-unique(metadata$consent_age)
-```
-```
-[1] 69 36 11 16 13 12 14 30 57 28 61 29 51 21 25 23 17 15 43 47 NA  7 10  8 37 44 26 32  9 40 74 19 55 50 45  6 56 38 76 24 41 53
-```
-Notice the NA within the numbers.
-
+In this case, let's impute with the median in order to not remove samples:
 ```
 metadata$consent_age[is.na(metadata$consent_age)] = median(metadata$consent_age, na.rm = T)
 ```
-Check the output:
-```
-unique(metadata$consent_age)
-```
-```
-[1] 69 36 11 16 13 12 14 30 57 28 61 29 51 21 25 23 17 15 43 47 20  7 10  8 37 44 26 32  9 40 74 19 55 50 45  6 56 38 76 24 41 53
-```
-NA has been replaced by 20; good to go.
 
-
-Extract species data from `tax` and transpose the dataframe:
+Extract species data from `tax` and transpose the dataframe so that taxa are in rows: 
 ```
-species = data.frame(t(tax[6:ncol(tax)]))
+species = as.data.frame(t(tax[6:ncol(tax)]))
+```
+Note that transpose returns a matrix, so we need to coerce it back into a dataframe.
+
+Check that `species` is all numeric values:
+```
+all(sapply(species, is.numeric))
 ```
 
-Check out `species`:
-
-Check out the structure:
-```
-str(species)
-```
-```
-'data.frame':	1479 obs. of  96 variables:
- $ CSM67UH7   : num  0 0 0 0 0 ...
- $ CSM79HHW   : num  0 0 0 0 0 0 0 0 0 1 ...
- $ HSM67VDT   : num  0 0 0 0 0 0 0 0 0 1 ...
- $ HSM6XRQB   : num  0 0 0 0 0 0 0 0 0 1 ...
- $ HSM6XRR3   : num  0 0 0 0 0 0 0 0 0 1 ...
- $ HSM7J4LP   : num  0 0 0 0 0 0 0 0 0 1 ...
- ...
-```
-Everything is numeric; good to go.
-
-Check the output:
+Take a look at the output:
 ```
 species[1:8,1:2]
 ```
@@ -194,18 +162,20 @@ k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanob
 k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_smithii                                                   0
 k__Archaea|p__Euryarchaeota|c__Methanobacteria|o__Methanobacteriales|f__Methanobacteriaceae|g__Methanobrevibacter|s__Methanobrevibacter_smithii|t__Methanobrevibacter_smithii_unclassified        0
 ```
-As we can see here, `species` currently has all taxonomic levels for each microbe, so now we need to only keep the species level information.
 
-grep the rows that do not include strain stratifications and store them in a new temporary vector:
+As we can see here, `species` currently has all taxonomic levels for each microbe. For now, we want to only keep the species level information.
+
+First, grep the rows that do not include strain stratifications and store them in a new temporary vector:
 ```
-tmp.ind = grep("\\|t__", rownames(species), invert = T)
+tmp_ind = grep("\\|t__", rownames(species), invert = T)
 ```
 
-Create a new dataframe with only those row numbers in `tmp.ind`:
+Create a new dataframe with only those row numbers in `tmp_ind`:
 ```
-tmp = species[tmp.ind,]
+tmp = species[tmp_ind,]
 ```
-Check the output:
+
+Verify that strains were removed by peeking at the output:
 ```
 row.names(tmp)[1:10]
 ```
@@ -222,15 +192,16 @@ row.names(tmp)[1:10]
  [10] "k__Bacteria|p__Acidobacteria"
 ```
 
-Now that we have removed the strain stratifications, let's select only the species level stratifications, removing all taxonomic levels before it:
+* Question: What will happen if there is no strain level information in the starting file?
 
+Now, let's select only the species level stratifications, removing all taxonomic levels before it:
 ```
-tmp.ind = grep("\\|s__", rownames(tmp))
+tmp_ind = grep("\\|s__", rownames(tmp))
 ```
 
-Create a new dataframe with only those row numbers in `tmp.ind`:
+Create a new dataframe with only those row numbers in `tmp_ind`. Make sure to select from `tmp`, not `species`:
 ```
-species = tmp[tmp.ind,]
+species = tmp[tmp_ind,]
 ```
 
 Check the output to make sure that we only have species level stratifications:
@@ -252,14 +223,16 @@ row.names(species)[1:10]
 
 Remove temp files to clear up space:
 ```
-rm(tmp,tmp.ind)
+rm(tmp, tmp_ind)
+```
+This isn't usually necessary, but R stores objects in RAM (virtual memory), so with very large datasets or small computing environments, it might matter.
+
+Now we have only species level information in `species`, but let's make the names shorter for display by trimming off all other taxonomic information:
+```
+row.names(species) = gsub(".*\\|", "", row.names(species))
 ```
 
-Now we have only species level information in `species`, but let's make the names shorter by trimming off all other taxonomic information that predates species:
-```
-rownames(species) = gsub(".*\\|", "", rownames(species))
-```
-Check the output:
+See if the row names look as expected:
 ```
 row.names(species)[1:6]
 ```
@@ -268,7 +241,7 @@ row.names(species)[1:6]
   [4] "s__Terriglobus_unclassified"                   "s__Actinobaculum_schaalii"                     "s__Actinobaculum_unclassified"                
 ```
 
-Now that we have sucessfully truncated the names in `species`, let's check the sample sums (colSums) to make sure they are in proportion format (0-1) and are all ~1:
+Now that we have successfully truncated the names in `species`, let's check the sample sums (colSums) to make sure they are in proportion format (0-1) and are all ~1:
 ```
 colSums(species)
 ```
@@ -278,7 +251,8 @@ colSums(species)
 ...
 ```
 
-Filter for beta diversity (we will keep species as is for alpha diversity):
+For beta diversity (and feature-wise) calculations, we usually apply a prevalence/abundance filter to remove low level noise and improve power. 
+However, for alpha diversity, this will reduce the (possibly real) differences in complexity between samples.
 
 Check the dimensions of species pre-filtering:
 ```
@@ -292,6 +266,10 @@ Filter:
 ```
 species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * ncol(species)), ]
 ```
+
+* Question: What exactly is this command doing? What does 0.0001 represent? 0.1?
+* Note that you can break the command apart to poke at the output, e.g. run `apply(species, 1, function(x) sum(x > 0.0001)` first.
+
 Check the dimensions of species post-filtering:
 ```
 dim(species_filt)
@@ -300,36 +278,22 @@ dim(species_filt)
 [1] 115  96
 ```
 
-Let's transpose the dataframes for easier use downstream, making the rows be the samples just like in the metadata:
+Let's transpose the dataframes for easier use downstream, making the rows be the samples, like in the metadata:
 ```
-species_filt = data.frame(t(species_filt), check.names = F)
-species = data.frame(t(species), check.names = F)
+species_filt = as.data.frame(t(species_filt), check.names = F)
+species = as.data.frame(t(species), check.names = F)
 ```
+Note that `check.names = F` is supplied so that invalid or repeated column names are not flagged as errors. 
+This is useful when you want to make sure your output always matches the original input file formating, but can be dangerous.  
+The `make.names()` function can be used to sanitize character vectors.
 
 Check to make sure the sample names are in the same order in both the metadata and the species dataframes:
 ```
-row.names(metadata) == row.names(species_filt)
-row.names(metadata) == row.names(species)
-```
-```
- [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[46] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[61] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[76] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[91] TRUE TRUE TRUE TRUE TRUE TRUE
-
- [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[16] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[31] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[46] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[61] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[76] TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-[91] TRUE TRUE TRUE TRUE TRUE TRUE
+all(row.names(metadata) == row.names(species_filt))
+all(row.names(metadata) == row.names(species))
 ```
 
->NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there just assign them in R with the following code:
+>NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there assign them in R with the following code:
 >```
 >metadata = read.csv(file = "metadata.csv", header = T, row.names = 1, check.names = FALSE)
 >species = read.csv(file = "species.csv", header = T, row.names = 1, check.names = FALSE)
