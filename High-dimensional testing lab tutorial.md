@@ -57,7 +57,7 @@ download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-
 
 Read the taxonomic relative abundance data into your R environment:
 ```
-tax = read.csv(file = "./Data/taxonomic_profiles_pcl_week0.csv", header = T, row.names = 1, check.names = FALSE)
+tax = read.csv(file = "./Data/taxonomic_profiles_pcl_week0.csv", header = T, row.names = 1, check.names = F)
 ```
 
 Take a look at `tax`:
@@ -178,9 +178,13 @@ Create a new dataframe with only those row numbers in `tmp_ind`:
 tmp = species[tmp_ind,]
 ```
 
-Verify that strains were removed by peeking at the output:
+Verify that strains were removed and skim the output to make sure nothing unexpected happened:
 ```
+grep("\\|t__", rownames(tmp), invert = F)
 row.names(tmp)[1:10]
+```
+```
+integer(0)
 ```
 ```
   [1] "k__Archaea"                                                                                                                                                                           
@@ -246,12 +250,11 @@ row.names(species)[1:6]
 
 Now that we have successfully truncated the names in `species`, let's check the sample sums (colSums) to make sure they are in proportion format (0-1) and are all ~1:
 ```
-colSums(species)
+colSums(species)[1:6]
 ```
 ```
    CSM67UH7    CSM79HHW    HSM67VDT    HSM6XRQB    HSM6XRR3    HSM7J4LP 
   0.9999752   1.0000004   1.0000005   0.9993355   0.9996256   1.0000003 
-...
 ```
 
 It is often useful to filter out low prevalence/abundance features in 'omics data, so we will make a filtered copy of the species table.
@@ -319,12 +322,18 @@ Check the output:
 head(alpha_div)
 ```
 ```
-BLOOP
+         diversity(species, index = "shannon")
+CSM67UH7                             1.7906860
+CSM79HHW                             2.5342475
+HSM67VDT                             2.2925910
+HSM6XRQB                             2.5677991
+HSM6XRR3                             2.2772366
+HSM7J4LP                             0.3959699
 ```
 
 Rename the columns to shorter names:
 ```
-names(alpha_div) = c("shannon")
+names(alpha_div) = c("Shannon")
 ```
 
 Collate with the metadata, so that a single dataframe can be provided to upcoming statistical tests:
@@ -345,7 +354,13 @@ Confirm this looks as expected:
 head(alpha_meta)
 ```
 ```
-BLOOP
+            Shannon    site_name    sex  race consent_age diagnosis
+CSM5FZ3N_P 1.741766 Cedars-Sinai Female White          43        CD
+CSM5FZ3T_P 1.634631 Cedars-Sinai Female White          76        CD
+CSM5FZ4A_P 2.117305 Cedars-Sinai Female White          47        UC
+CSM5MCTZ_P 2.665711 Cedars-Sinai   Male White          32        UC
+CSM5MCU4_P 1.119533 Cedars-Sinai Female White          53        CD
+CSM5MCV1_P 1.478073 Cedars-Sinai Female White          20        CD
 ```
 
 #### Univariable
@@ -355,46 +370,103 @@ Linear models are straightforward and can accommodate a large variety of experim
 
 Run a linear model on diagnosis and return as an ANOVA table:
 ```
-alpha_shannon_univ = anova(lm(Shannon ~ diagnosis, data = alpha_meta)) 
+anova(lm(Shannon ~ diagnosis, data = alpha_meta))
+```
+```
+Analysis of Variance Table
+
+Response: Shannon
+          Df  Sum Sq Mean Sq F value Pr(>F)
+diagnosis  2  0.4046 0.20231  0.6692 0.5146
+Residuals 93 28.1163 0.30233               
 ```
 
 Can do this with a for loop to quickly get results for each metadata variable:
 ```
-for (col in names(metadata)){
+for (col in names(metadata)) {
   alpha_shannon_univ = anova(lm(as.formula(paste("Shannon ~ ", col)), data = alpha_meta)) 
   print(col)
   print(alpha_shannon_univ)
 }
 ```
 ```
-BLOOP
+[1] "site_name"
+Analysis of Variance Table
+
+Response: Shannon
+          Df  Sum Sq Mean Sq F value Pr(>F)
+site_name  4  1.6732 0.41831  1.4179 0.2344
+Residuals 91 26.8477 0.29503               
+[1] "sex"
+Analysis of Variance Table
+
+Response: Shannon
+          Df  Sum Sq Mean Sq F value  Pr(>F)  
+sex        1  0.9209 0.92088  3.1363 0.07981 .
+Residuals 94 27.6001 0.29362                  
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+[1] "race"
+Analysis of Variance Table
+
+Response: Shannon
+          Df  Sum Sq Mean Sq F value Pr(>F)
+race       3  0.9266 0.30886  1.0297 0.3832
+Residuals 92 27.5944 0.29994               
+[1] "consent_age"
+Analysis of Variance Table
+
+Response: Shannon
+            Df  Sum Sq  Mean Sq F value Pr(>F)
+consent_age  1  0.0105 0.010538  0.0347 0.8525
+Residuals   94 28.5104 0.303302               
+[1] "diagnosis"
+Analysis of Variance Table
+
+Response: Shannon
+          Df  Sum Sq Mean Sq F value Pr(>F)
+diagnosis  2  0.4046 0.20231  0.6692 0.5146
+Residuals 93 28.1163 0.30233               
 ```
 
-* Question: Everyone likely knows what the Pr(>F) value means (the p-value), but what does the Df value tell us?
+* **Everyone likely knows what the Pr(>F) value means (the p-value), but what does the Df value tell us?**
 
 #### Multivariable
 
-* Question: What are univariable and multivariable tests, and what benefits do both provide?
+* **What are univariable and multivariable tests, and what benefits do both provide?**
 
 Try a model with the age and diagnosis:
 ```
-shannon_multi = anova(lm(Shannon ~ consent_age + diagnosis, data = alpha_met_df))
-shannon_multi
+anova(lm(Shannon ~ diagnosis + sex, data = alpha_meta))
 ```
 ```
-BLOOP
+Analysis of Variance Table
+
+Response: Shannon
+          Df  Sum Sq Mean Sq F value Pr(>F)
+diagnosis  2  0.4046 0.20231  0.6808 0.5087
+sex        1  0.7781 0.77807  2.6184 0.1091
+Residuals 92 27.3383 0.29716  
 ```
 
 If all variables in the file are used, there's a nice shorthand in R:
 ```
-shannon_multi = anova(lm(Shannon ~ ., data = alpha_meta))
-shannon_multi
+anova(lm(Shannon ~ ., data = alpha_meta))
 ```
 ```
-BLOOP
+Analysis of Variance Table
+
+Response: Shannon
+            Df  Sum Sq Mean Sq F value Pr(>F)
+site_name    4  1.6732 0.41831  1.4118 0.2371
+sex          1  0.4001 0.40012  1.3504 0.2485
+race         3  0.6939 0.23130  0.7807 0.5080
+consent_age  1  0.7356 0.73559  2.4826 0.1189
+diagnosis    2  0.1294 0.06472  0.2184 0.8042
+Residuals   84 24.8887 0.29629               
 ```
 
-* Question: This can be expanded to include random effects with the `lme4` package. Is there anything in this demo data that might indicate a mixed model would be useful?
+* **This can be expanded to include random effects with the `lme4` package. Is there anything in this demo data that might indicate a mixed model would be useful?**
 
 ### Beta Diversity
 
@@ -420,26 +492,98 @@ Note that `adonis` is now officially deprecated and older code that uses this fu
 Run permanova and print the results:
 ```
 set.seed(123)
-adonis_diagnosis_tax = adonis2(bray_species ~ diagnosis, data = metadata)
-adonis_diagnosis_tax
+adonis2(bray_species ~ diagnosis, data = metadata)
 ```
 ```
-BLOOP
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = bray_species ~ diagnosis, data = metadata)
+          Df SumOfSqs      R2      F Pr(>F)  
+diagnosis  2   0.9399 0.03255 1.5646   0.02 *
+Residual  93  27.9347 0.96745                
+Total     95  28.8747 1.00000                
+---
+Signif. codes:  `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
-As you can see, the results look quite similar to the more familiar ANOVA test.
+As you can see, the results format looks quite similar to the more familiar ANOVA test.
 
 * **Why is a seed set before calling `adonis`?** Try running it again without resetting the seed.
 
 Can do this with a for loop as well:
 ```
-for (col in names(metadata)){
+for (col in names(metadata)) {
   set.seed(123)
   adonis_univ <- adonis2(as.formula(paste("bray_species ~ ", col)), data = metadata)
   print(adonis_univ)
 }
 ```
 ```
-BLOOP
+[1] "site_name"
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = as.formula(paste("bray_species ~ ", col)), data = metadata)
+          Df SumOfSqs      R2      F Pr(>F)  
+site_name  4   1.6651 0.05767 1.3922  0.021 *
+Residual  91  27.2095 0.94233                
+Total     95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+[1] "sex"
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = as.formula(paste("bray_species ~ ", col)), data = metadata)
+         Df SumOfSqs      R2      F Pr(>F)  
+sex       1   0.5925 0.02052 1.9694  0.013 *
+Residual 94  28.2821 0.97948                
+Total    95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+[1] "race"
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = as.formula(paste("bray_species ~ ", col)), data = metadata)
+         Df SumOfSqs      R2      F Pr(>F)
+race      3   0.7778 0.02694 0.8489  0.771
+Residual 92  28.0969 0.97306              
+Total    95  28.8747 1.00000              
+[1] "consent_age"
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = as.formula(paste("bray_species ~ ", col)), data = metadata)
+            Df SumOfSqs      R2      F Pr(>F)  
+consent_age  1   0.4683 0.01622 1.5497  0.067 .
+Residual    94  28.4063 0.98378                
+Total       95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+[1] "diagnosis"
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = as.formula(paste("bray_species ~ ", col)), data = metadata)
+          Df SumOfSqs      R2      F Pr(>F)  
+diagnosis  2   0.9399 0.03255 1.5646   0.02 *
+Residual  93  27.9347 0.96745                
+Total     95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 
 * **What does the R2 value tell us?** 
@@ -449,17 +593,23 @@ BLOOP
 
 BLOOP:
 ```
-adonis_multi_tax = adonis(bray_species ~ site_name + sex + race + consent_age + diagnosis, data = metadata)
-adonis_multi_tax
+set.seed(123)
+adonis2(bray_species ~ consent_age + diagnosis, data = metadata)
 ```
 ```
 BLOOP
 ```
 
+PERMANOVA is by default sequentially, but it's possible to do a marginal test:
+```
+set.seed(123)
+adonis2(bray_species ~ consent_age + diagnosis, data = metadata, by = "margin")
+```
+
 Can use the same shorthand as with linear models:
 ```
-adonis_multi_tax = adonis(bray_species ~ ., data = metadata)
-adonis_multi_tax
+set.seed(123)
+adonis2(bray_species ~ ., data = metadata)
 ```
 ```
 BLOOP
