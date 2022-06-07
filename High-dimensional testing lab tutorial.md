@@ -32,9 +32,10 @@
 
 # Omnibus tests on MGX and MTX data from the HMP2 baseline only data
 
-Set the working directory:
+Start R and set the working directory. In the bioBakery VM, as follows:
 ```
-setwd("Tutorials/highdimtesting")
+R
+setwd("~/Tutorials/highdimtesting")
 ```
 
 Load the R packages needed:
@@ -42,7 +43,8 @@ Load the R packages needed:
 library(vegan)
 ```
 
-* Question: What are omnibus tests and how do they differ from featurewise tests? How might these complement each other?
+* **What are omnibus tests and how do they differ from featurewise tests?**
+* **How might these complement each other?**
 
 ## MGX taxonomy
 
@@ -63,7 +65,7 @@ Take a look at `tax`:
 tax[1:10,1:10]
 ```
 
-* Question: Why not use head(tax)? Try it if you are unsure.
+* **Why not use head(tax)?** Try it if you are unsure.
 
 Check the dimensions:
 ```
@@ -78,7 +80,7 @@ Extract the metadata from `tax`, the first 5 columns in this file:
 metadata = tax[1:5]
 ```
 
-* Question: What are the advantages and disadvantages of storing and accessing data like this?  
+* **What are the advantages and disadvantages of storing and accessing data like this?**  
 
 Take a look at `metadata`:
 ```
@@ -120,7 +122,8 @@ Age has 6 NA.
 
 If this was a discrete variable we could classify the NAs as "unknown" and keep them in the model, but since age is a continuous variable typically we would either remove those from the data or impute. 
 
-* Question: What is the main drawback of keeping NA values for discrete variables? Is there a case where this is totally justified?
+* **What is the main drawback of keeping NA values for discrete variables?** 
+* **Is there a case where this is totally justified?**
 
 In this case, let's impute with the median in order to not remove samples:
 ```
@@ -192,7 +195,7 @@ row.names(tmp)[1:10]
  [10] "k__Bacteria|p__Acidobacteria"
 ```
 
-* Question: What will happen if there is no strain level information in the starting file?
+* **What will happen if there is no strain level information in the starting file?**
 
 Now, let's select only the species level stratifications, removing all taxonomic levels before it:
 ```
@@ -266,8 +269,7 @@ Filter:
 species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * ncol(species)), ]
 ```
 
-* Question: What exactly is this command doing? What does 0.0001 represent? 0.1?
- * Note that you can break the command apart to poke at the output, e.g. run `apply(species, 1, function(x) sum(x > 0.0001)` first.
+* **What exactly is this command doing? What does 0.0001 represent? 0.1?** Note that you can break the command apart to poke at the output, e.g. run `apply(species, 1, function(x) sum(x > 0.0001)` first.
 
 Check the dimensions of species post-filtering:
 ```
@@ -292,7 +294,7 @@ all(row.names(metadata) == row.names(species_filt))
 all(row.names(metadata) == row.names(species))
 ```
 
-* Question: Why perform this type of filtering? Are there situations were it might not be appropriate?
+* **Why perform this type of filtering? Are there situations were it might not be appropriate?**
 
 >NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there assign them in R with the following code:
 >```
@@ -303,7 +305,7 @@ all(row.names(metadata) == row.names(species))
 
 ### Alpha diversity
 
-* Question: What is alpha diversity, and why is it important? 
+* **What is alpha diversity, and why is it important?**
 
 Using the unfiltered species data, calculate a common alpha diversity index:
 ```
@@ -396,20 +398,21 @@ BLOOP
 
 ### Beta Diversity
 
-* Question: What is beta diversity, and why is it important? 
+* **What is beta diversity, and why is it important?**
 
 Using the filtered species table, calculate Bray-Curtis dissimilarity:
 ```
 bray_species = vegdist(species_filt, method = "bray")
 ```
 
-* Question: What makes Bray-Curtis dissimilarity a good index to use for this type of data? Do you know of other options?
+* **What makes Bray-Curtis dissimilarity a good index to use for this type of data?** 
+* **Do you know of other options?**
 
 #### Univariable
 
 Unlike alpha diversity, beta diversity is defined between samples, and therefore, many common statistical tests are not usable. 
 
-* Question: Why bother with beta diversity then?
+* **Why bother with beta diversity then?**
 
 PERMANOVA is the most common omnibus beta diversity test and is implemented as `adonis2` by the vegan package.
 Note that `adonis` is now officially deprecated and older code that uses this function may act strangely. 
@@ -425,7 +428,7 @@ BLOOP
 ```
 As you can see, the results look quite similar to the more familiar ANOVA test.
 
-* Question: Why is a seed set before calling `adonis`? Try running it again without resetting the seed.
+* **Why is a seed set before calling `adonis`?** Try running it again without resetting the seed.
 
 Can do this with a for loop as well:
 ```
@@ -439,7 +442,8 @@ for (col in names(metadata)){
 BLOOP
 ```
 
-* Question: What does the R2 value tell us? Biologically, when might you expect a large R2? How about a small but significant R2?
+* **What does the R2 value tell us?** 
+* **Biologically, when might you expect a large R2? How about a small but significant R2?**
 
 #### Multivariable
 
