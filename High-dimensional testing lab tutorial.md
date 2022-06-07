@@ -45,7 +45,7 @@ library(vegan)
 * **What are omnibus tests and how do they differ from featurewise tests?**
 * **How might these complement each other?**
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  Omnibus tests are global tests, here of the microbial community diversity. Especially in smaller studies, it's possible that no individual features reach significance, but some microbiome association can nonetheless be statistically shown.
 </details>
@@ -71,6 +71,12 @@ tax[1:10,1:10]
 
 * **Why not use head(tax)?** Try it if you are unsure.
 
+<details>
+ <summary><b>Answer:</b></summary>
+ 
+ `head` cuts off at a certain number of rows, but not columns.
+</details>
+
 Check the dimensions:
 ```
 dim(tax)
@@ -87,7 +93,7 @@ metadata = tax[1:5]
 * **What are the advantages and disadvantages of storing and accessing data like this?** 
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  A single file can be easier to deal with and is required for some tools, but accessing data with static indicies can cause problems if the file is changed (e.g. if another metadata column is added then tax[1:5] is not correct). 
 </details>
@@ -136,7 +142,7 @@ If this was a discrete variable we could classify the NAs as "unknown" and keep 
 * **Is there a case where this is totally justified?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  Adding another category means increasing the degrees of freedom in downstream statistical tests. You may however want to specifically investigate if missing values are meaningful (e.g. failure to report a value can indicate study attrition which may be caused by an adverse reaction).
 </details>
@@ -218,7 +224,7 @@ integer(0)
 * **What will happen if there is no strain level information in the starting file?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  There's no issue, but it's always good to check that your code can handle different situations. MetaPhlAn doesn't alway return strain stratifications, so it's is particularly important in this case.
 </details>
@@ -297,7 +303,7 @@ species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * nco
 * **What exactly is this command doing? What does 0.0001 represent? 0.1?** Note that you can break the command apart to poke at the output, e.g. run `apply(species, 1, function(x) sum(x > 0.0001)` first.
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  This filters out species with less than 0.0001 relative abundance in 10% of samples.
 </details>
@@ -328,7 +334,7 @@ all(row.names(metadata) == row.names(species))
 * **Why perform this type of filtering? Are there situations were it might not be appropriate?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  Low prevalence/abundance features are often not meaningful and can reduce power of some tests. However, one needs to be certain this isn't removing real biological variation. Alpha diversity is sensitive to filtering (so we generally don't) and some datasets have important low prevalence taxa or outlier samples.
 </details>
@@ -345,9 +351,9 @@ all(row.names(metadata) == row.names(species))
 * **What is alpha diversity, and why is it important?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ Alpha diversity summarizes the structure of an ecological community with respect to its richness (roughly, number of features), evenness (roughly, distribution of features), or both. Many perturbations to the microbiome affect this.
 </details>
 
 Using the unfiltered species data, calculate a common alpha diversity index:
@@ -474,9 +480,9 @@ Residuals 93 28.1163 0.30233
 * **What are univariable and multivariable tests, and what benefits do both provide?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ Univariable tests have only one independent variable and multivariable have more. Note that multivariate formally refers to multiple dependent variables, though these terms are often used interchangeably. 
 </details>
 
 Try a model with the age and diagnosis:
@@ -513,7 +519,7 @@ Residuals   84 24.8887 0.29629
 * **This can be expanded to include random effects with the `lme4` package. Is there anything in this demo data that might indicate a mixed model would be useful?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  `site_name` is the location where the sample was collected and is likely better considered a random effect, since we aren't necessarily interested in how the sites vary but rather controlling for the overall effect of sampling site (of theoretically many).
 </details>
@@ -523,41 +529,33 @@ Residuals   84 24.8887 0.29629
 * **What is beta diversity, and why is it important?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ Beta diversity quantifies how similar (or dissimilar) pairs of samples are in composition. This can be used to create a map of distances between samples (e.g. PCoA plot) and the significance of grouping or gradients of samples can be tested.
 </details>
 
 Using the filtered species table, calculate Bray-Curtis dissimilarity:
 ```
 bray_species = vegdist(species_filt, method = "bray")
 ```
-
-* **What makes Bray-Curtis dissimilarity a good index to use for this type of data?** 
-* **Do you know of other options?**
-
-<details>
- <summary>Answer:</summary>
- 
- BLAH
-</details>
+Bray-Curtis is commonly used for microbiome data because it incorporates presence vs. absence and relative abundance of features when determining dissimilarities (i.e. is weighted). Another common index for species data is Weighted UniFrac, which additionally includes phylogenetic information. 
 
 #### Univariable
 
-Unlike alpha diversity, beta diversity is defined between samples, and therefore, many common statistical tests are not usable. 
+Unlike alpha diversity, beta diversity is not defined on a single sample level, and therefore, many common statistical tests are not usable. 
 
 * **Why bother with beta diversity then?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ While one could take a difference of alpha diversity between samples and get a number, this is not particularly robust or meaningful. Alpha diversity trends are also in general more sensitive to difficult to control or arbitrary factors, such as sampling depth and technical noise.
 </details>
 
 PERMANOVA is the most common omnibus beta diversity test and is implemented as `adonis2` by the vegan package.
 Note that `adonis` is now officially deprecated and older code that uses this function may act strangely. 
 
-Run permanova and print the results:
+Run a PERMANOVA and print the results:
 ```
 set.seed(123)
 adonis2(bray_species ~ diagnosis, data = metadata)
@@ -581,7 +579,7 @@ As you can see, the results format looks quite similar to the more familiar ANOV
 * **Why is a seed set before calling `adonis2`?** Try running it again without resetting the seed.
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
  PERMANOVA determines p-values via permutation tests, so unless a seed is set, the values will be different each time you run it.
 </details>
@@ -664,9 +662,9 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 * **Biologically, when might you expect a large R2? How about a small but significant R2?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ R2 is proportion of the variance for a dependent variable that's explained by an independent variable. You might expect a large R2 for a distinct perturbation like recent antibiotic treatment and a small but significant R2 for a complex population level trend, such as urbanicity in childhood. 
 </details>
 
 #### Multivariable
@@ -712,15 +710,15 @@ Total       95  28.8747 1.00000
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
-Note that this can get very slow as more terms are added.
+Note that this can get very computationally expensive as more terms are added.
 
 * **What is the difference between these two models?** 
-* **When might you want to use each type of test?**
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ The marginal model is agnostic to the ordering of terms. For PERMANOVA, it can be generated by hand by running the sequential model twice (see that the second term, diagnosis, has the same output both times).  The trade-off is that the R2 do not necessarily add up to 1.  
+
 </details>
 
 Can use the same shorthand as with linear models to include all variables:
@@ -768,14 +766,13 @@ Total         95  28.8747 1.00000
 ---
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
-These are not as commonly performed and should be interpreted with caution however. 
 
 * **Is this result reasonable? What factors might complicate this relationship?** 
 
 <details>
- <summary>Answer:</summary>
+ <summary><b>Answer:</b></summary>
  
- BLAH
+ There are known epidemiological incidence and prevalence sex differences in IBD, but they are not straightforward and are confounded by other factors such as age and type of IBD (UC vs CD). Also, some caution should be taken when using and interpreting interaction effects in PERMANOVA models since these are not as developed or rigorously tested as in ANOVA.
 </details>
 
 ## MGX pathways
