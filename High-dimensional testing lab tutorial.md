@@ -767,7 +767,8 @@ Total         95  28.8747 1.00000
 Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 
-* **Is this result reasonable? What factors might complicate this relationship?** 
+* **Is this result reasonable?** 
+* **What factors might complicate this relationship?** 
 
 <details>
  <summary><b>Answer:</b></summary>
