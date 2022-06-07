@@ -7,9 +7,8 @@
       - [Univariable](#univariable)
       - [Multivariable](#multivariable)
     + [Beta Diversity](#beta-diversity)
-      - [Univariable](#univariable)
-      - [Multivariable](#multivariable)
-      - [Pairwise Bray-Curtis comparisons](#pairwise-bray-curtis-comparisons)
+      - [Univariable](#univariable-1)
+      - [Multivariable](#multivariable-1)
   * [MGX pathways](#mgx-pathways)
     + [Feature table and metadata table creation and formatting](#feature-table-and-metadata-table-creation-and-formatting-1)
     + [Beta Diversity PERMANOVA tests using Bray-Curtis Dissimilarity](#beta-diversity-permanova-tests-using-bray-curtis-dissimilarity)
@@ -45,6 +44,11 @@ library(vegan)
 
 * **What are omnibus tests and how do they differ from featurewise tests?**
 * **How might these complement each other?**
+<details>
+ <summary>Answer:</summary>
+ 
+ Omnibus tests are global tests, here of the microbial community diversity. Especially in smaller studies, it's possible that no individual features reach significance, but some microbiome association can nonetheless be statistically shown.
+</details>
 
 ## MGX taxonomy
 
@@ -80,7 +84,13 @@ Extract the metadata from `tax`, the first 5 columns in this file:
 metadata = tax[1:5]
 ```
 
-* **What are the advantages and disadvantages of storing and accessing data like this?**  
+* **What are the advantages and disadvantages of storing and accessing data like this?** 
+
+<details>
+ <summary>Answer:</summary>
+ 
+ A single file can be easier to deal with and is required for some tools, but accessing data with static indicies can cause problems if the file is changed (e.g. if another metadata column is added then tax[1:5] is not correct). 
+</details>
 
 Take a look at `metadata`:
 ```
@@ -124,6 +134,12 @@ If this was a discrete variable we could classify the NAs as "unknown" and keep 
 
 * **What is the main drawback of keeping NA values for discrete variables?** 
 * **Is there a case where this is totally justified?**
+
+<details>
+ <summary>Answer:</summary>
+ 
+ Adding another category means increasing the degrees of freedom in downstream statistical tests. You may however want to specifically investigate if missing values are meaningful (e.g. failure to report a value can indicate study attrition which may be caused by an adverse reaction).
+</details>
 
 In this case, let's impute with the median in order to not remove samples:
 ```
@@ -201,6 +217,12 @@ integer(0)
 
 * **What will happen if there is no strain level information in the starting file?**
 
+<details>
+ <summary>Answer:</summary>
+ 
+ There's no issue, but it's always good to check that your code can handle different situations. MetaPhlAn doesn't alway return strain stratifications, so it's is particularly important in this case.
+</details>
+
 Now, let's select only the species level stratifications, removing all taxonomic levels before it:
 ```
 tmp_ind = grep("\\|s__", rownames(tmp))
@@ -274,6 +296,12 @@ species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * nco
 
 * **What exactly is this command doing? What does 0.0001 represent? 0.1?** Note that you can break the command apart to poke at the output, e.g. run `apply(species, 1, function(x) sum(x > 0.0001)` first.
 
+<details>
+ <summary>Answer:</summary>
+ 
+ This filters out species with less than 0.0001 relative abundance in 10% of samples.
+</details>
+
 Check the dimensions of species post-filtering:
 ```
 dim(species_filt)
@@ -299,6 +327,12 @@ all(row.names(metadata) == row.names(species))
 
 * **Why perform this type of filtering? Are there situations were it might not be appropriate?**
 
+<details>
+ <summary>Answer:</summary>
+ 
+ Low prevalence/abundance features are often not meaningful and can reduce power of some tests. However, one needs to be certain this isn't removing real biological variation. Alpha diversity is sensitive to filtering (so we generally don't) and some datasets have important low prevalence taxa or outlier samples.
+</details>
+
 >NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there assign them in R with the following code:
 >```
 >metadata = read.csv(file = "metadata.csv", header = T, row.names = 1, check.names = F)
@@ -309,6 +343,12 @@ all(row.names(metadata) == row.names(species))
 ### Alpha diversity
 
 * **What is alpha diversity, and why is it important?**
+
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
 
 Using the unfiltered species data, calculate a common alpha diversity index:
 ```
@@ -429,11 +469,15 @@ diagnosis  2  0.4046 0.20231  0.6692 0.5146
 Residuals 93 28.1163 0.30233               
 ```
 
-* **Everyone likely knows what the Pr(>F) value means (the p-value), but what does the Df value tell us?**
-
 #### Multivariable
 
 * **What are univariable and multivariable tests, and what benefits do both provide?**
+
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
 
 Try a model with the age and diagnosis:
 ```
@@ -468,9 +512,21 @@ Residuals   84 24.8887 0.29629
 
 * **This can be expanded to include random effects with the `lme4` package. Is there anything in this demo data that might indicate a mixed model would be useful?**
 
+<details>
+ <summary>Answer:</summary>
+ 
+ `site_name` is the location where the sample was collected and is likely better considered a random effect, since we aren't necessarily interested in how the sites vary but rather controlling for the overall effect of sampling site (of theoretically many).
+</details>
+
 ### Beta Diversity
 
 * **What is beta diversity, and why is it important?**
+
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
 
 Using the filtered species table, calculate Bray-Curtis dissimilarity:
 ```
@@ -480,11 +536,23 @@ bray_species = vegdist(species_filt, method = "bray")
 * **What makes Bray-Curtis dissimilarity a good index to use for this type of data?** 
 * **Do you know of other options?**
 
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
+
 #### Univariable
 
 Unlike alpha diversity, beta diversity is defined between samples, and therefore, many common statistical tests are not usable. 
 
 * **Why bother with beta diversity then?**
+
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
 
 PERMANOVA is the most common omnibus beta diversity test and is implemented as `adonis2` by the vegan package.
 Note that `adonis` is now officially deprecated and older code that uses this function may act strangely. 
@@ -510,7 +578,13 @@ Signif. codes:  `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 As you can see, the results format looks quite similar to the more familiar ANOVA test.
 
-* **Why is a seed set before calling `adonis`?** Try running it again without resetting the seed.
+* **Why is a seed set before calling `adonis2`?** Try running it again without resetting the seed.
+
+<details>
+ <summary>Answer:</summary>
+ 
+ PERMANOVA determines p-values via permutation tests, so unless a seed is set, the values will be different each time you run it.
+</details>
 
 Can do this with a for loop as well:
 ```
@@ -589,31 +663,120 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 * **What does the R2 value tell us?** 
 * **Biologically, when might you expect a large R2? How about a small but significant R2?**
 
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
+
 #### Multivariable
 
-BLOOP:
+Try a model with age and diagnosis:
 ```
 set.seed(123)
 adonis2(bray_species ~ consent_age + diagnosis, data = metadata)
 ```
 ```
-BLOOP
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = bray_species ~ consent_age + diagnosis, data = metadata)
+            Df SumOfSqs      R2      F Pr(>F)  
+consent_age  1   0.4683 0.01622 1.5696  0.060 .
+diagnosis    2   0.9569 0.03314 1.6035  0.015 *
+Residual    92  27.4495 0.95064                
+Total       95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
 
-PERMANOVA is by default sequentially, but it's possible to do a marginal test:
+PERMANOVA is by default sequential, but it's possible to do a marginal test:
 ```
 set.seed(123)
 adonis2(bray_species ~ consent_age + diagnosis, data = metadata, by = "margin")
 ```
+```
+Permutation test for adonis under reduced model
+Marginal effects of terms
+Permutation: free
+Number of permutations: 999
 
-Can use the same shorthand as with linear models:
+adonis2(formula = bray_species ~ consent_age + diagnosis, data = metadata, by = "margin")
+            Df SumOfSqs      R2      F Pr(>F)  
+consent_age  1   0.4853 0.01681 1.6264  0.048 *
+diagnosis    2   0.9569 0.03314 1.6035  0.015 *
+Residual    92  27.4495 0.95064                
+Total       95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+```
+Note that this can get very slow as more terms are added.
+
+* **What is the difference between these two models?** 
+* **When might you want to use each type of test?**
+
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
+
+Can use the same shorthand as with linear models to include all variables:
 ```
 set.seed(123)
 adonis2(bray_species ~ ., data = metadata)
 ```
 ```
-BLOOP
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = bray_species ~ ., data = metadata)
+            Df SumOfSqs      R2      F Pr(>F)  
+site_name    4   1.6651 0.05767 1.4195  0.018 *
+sex          1   0.4848 0.01679 1.6531  0.044 *
+race         3   0.8897 0.03081 1.0113  0.438  
+consent_age  1   0.3545 0.01228 1.2088  0.230  
+diagnosis    2   0.8470 0.02933 1.4441  0.051 .
+Residual    84  24.6335 0.85312                
+Total       95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 ```
+
+Interaction terms are also possible:
+```
+set.seed(123)
+adonis2(bray_species ~ diagnosis * sex, data = metadata)
+```
+```
+Permutation test for adonis under reduced model
+Terms added sequentially (first to last)
+Permutation: free
+Number of permutations: 999
+
+adonis2(formula = bray_species ~ diagnosis * sex, data = metadata)
+              Df SumOfSqs      R2      F Pr(>F)  
+diagnosis      2   0.9399 0.03255 1.5909  0.015 *
+sex            1   0.5614 0.01944 1.9004  0.013 *
+diagnosis:sex  2   0.7874 0.02727 1.3327  0.059 .
+Residual      90  26.5860 0.92074                
+Total         95  28.8747 1.00000                
+---
+Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
+```
+These are not as commonly performed and should be interpreted with caution however. 
+
+* **Is this result reasonable? What factors might complicate this relationship?** 
+
+<details>
+ <summary>Answer:</summary>
+ 
+ BLAH
+</details>
 
 ## MGX pathways
 
