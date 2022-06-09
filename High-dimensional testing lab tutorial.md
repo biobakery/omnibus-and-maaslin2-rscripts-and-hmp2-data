@@ -806,7 +806,7 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 
 # Next steps
 
-Hopefully upon finishing this tutorial, you can apply these concepts and reuse some of this code on your own projects. We also encourage you to try visualizing your results with something like the tidyverse package.
+Hopefully upon finishing this tutorial, you can apply these concepts and reuse some of this code on your own projects. We also encourage you to try visualizing your results with something like the tidyverse package set.
 
 If you'd like to continue practing on the HMP2 data, metagenomic pathways and metatranscriptomic pathways are available:
 
