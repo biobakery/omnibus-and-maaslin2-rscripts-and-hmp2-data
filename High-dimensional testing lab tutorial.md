@@ -256,12 +256,6 @@ row.names(species)[1:10]
  [10] "k__Bacteria|p__Actinobacteria|c__Actinobacteria|o__Actinomycetales|f__Actinomycetaceae|g__Actinomyces|s__Actinomyces_turicensis"    
 ```
 
-Remove temp files to clear up space:
-```
-rm(tmp, tmp_ind)
-```
-This isn't usually necessary, but R stores objects in RAM (virtual memory), so with very large datasets or small computing environments, it might matter.
-
 Now we have only species level information in `species`, but let's make the names shorter for display by trimming off all other taxonomic information:
 ```
 row.names(species) = gsub(".*\\|", "", row.names(species))
