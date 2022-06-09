@@ -9,6 +9,7 @@
     + [Beta Diversity](#beta-diversity)
       - [Univariable](#univariable-1)
       - [Multivariable](#multivariable-1)
+   * [Next steps](#next-steps)
 
 # Omnibus tests on data from the HMP2 baseline only data
 
@@ -802,3 +803,19 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 </details>
 
 ---
+
+# Next steps
+
+Hopefully upon finishing this tutorial, you can apply these concepts and reuse some of this code on your own projects. We also encourage you to try visualizing your results with something like the tidyverse package.
+
+If you'd like to continue practing on the HMP2 data, metagenomic pathways and metatranscriptomic pathways are available:
+
+```
+download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/dna_pathabundance_relab_pcl_week0.csv", "./Data/dna_pathabundance_relab_pcl_week0.csv")
+download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/rna_pathabundance_relab_pcl_week0.csv", "./Data/rna_pathabundance_relab_pcl_week0.csv")
+```
+Note that these will not exactly run with the above steps, but they should be close enough that you can figure out the differences. Some things to consider are:
+- How are the pathways formatted and do you want to keep all of this information or no?
+- Are metadata and data dimensions guaranteed to match and how can you handle this if not?
+
+
