@@ -13,7 +13,18 @@
 
 # Omnibus tests on data from the HMP2 baseline only data
 
-In this tutorial, we are going to take data from the second phase of the Human Microbiome Project, and look at some common exploratory analyses which search for evidence of general microbiome associations with cohort metadata. These tests are frequently the first we perform on a new dataset (after quality control) and can give a good idea of things such as the overall strength of an intervention or the degree to which covariates might confound the main microbiome outcomes of interest.
+---
+* **What are omnibus tests and how do they differ from featurewise tests?**
+* **How might these complement each other?**
+<details>
+ <summary><b>Answer:</b></summary>
+ 
+ Omnibus tests are global tests, here of the microbial community diversity. Especially in smaller studies, it's possible that no individual features reach significance, but some microbiome association can nonetheless be statistically shown.
+</details>
+
+---
+
+In this tutorial, we are going to take data from the second phase of the Human Microbiome Project, and look at some common exploratory analyses which search for evidence of general microbiome associations with cohort metadata. These tests are frequently the first we perform on a new feature table and can give a good idea of things such as the overall strength of an intervention or the degree to which covariates might confound the main microbiome outcomes of interest.
 
 We are starting with the baseline timepoint, metagenome-derived species data, since species tables (+ associated metadata) are what you will likely most commonly encounter, and longitudinal designs require more advanced statistical techniques. 
 
@@ -28,17 +39,6 @@ Load the R packages needed:
 library(vegan)
 ```
 
----
-* **What are omnibus tests and how do they differ from featurewise tests?**
-* **How might these complement each other?**
-<details>
- <summary><b>Answer:</b></summary>
- 
- Omnibus tests are global tests, here of the microbial community diversity. Especially in smaller studies, it's possible that no individual features reach significance, but some microbiome association can nonetheless be statistically shown.
-</details>
-
----
-
 ## MGX taxonomy
 
 ### Feature table and metadata table creation and formatting
@@ -47,6 +47,9 @@ Download the MGX taxonomy relative abundance data and put it into the data direc
 ```
 download.file("https://raw.githubusercontent.com/biobakery/omnibus-and-maaslin2-rscripts-and-hmp2-data/master/taxonomic_profiles_pcl_week0.csv", "./Data/taxonomic_profiles_pcl_week0.csv")
 ```
+
+Note that `check.names = F` is supplied so that invalid or repeated column names are not flagged as errors or automatically "corrected". 
+This is useful when you want to make sure your output always matches the original input file formating, but can be dangerous.  
 
 Read the taxonomic relative abundance data into your R environment:
 ```
@@ -131,7 +134,7 @@ site_name         sex        race consent_age   diagnosis
 
 Age has 6 NA.
 
-If this was a discrete variable we could classify the NAs as "unknown" and keep them in the model, but since age is a continuous variable typically we would either remove those from the data or impute. 
+If this was a discrete variable we could classify the NAs as "unknown" and keep them in the model, but since age is a continuous variable typically we would either remove those samples from the data or impute. 
 
 ---
 * **What is the main drawback of keeping NA values for discrete variables?** 
@@ -145,7 +148,7 @@ If this was a discrete variable we could classify the NAs as "unknown" and keep 
 
 ---
 
-In this case, let's impute with the median in order to not remove samples:
+In this case, let's impute with the median:
 ```
 metadata$consent_age[is.na(metadata$consent_age)] = median(metadata$consent_age, na.rm = T)
 ```
@@ -190,7 +193,7 @@ As we can see here, `species` currently has all taxonomic levels for each microb
 
 First, grep the rows that do not include strain stratifications and store them in a new temporary vector:
 ```
-tmp_ind = grep("\\|t__", rownames(species), invert = T)
+tmp_ind = grep("\\|t__", row.names(species), invert = T)
 ```
 
 Create a new dataframe with only those row numbers in `tmp_ind`:
@@ -200,7 +203,7 @@ tmp = species[tmp_ind,]
 
 Verify that strains were removed and skim the output to make sure nothing unexpected happened:
 ```
-grep("\\|t__", rownames(tmp), invert = F)
+grep("\\|t__", row.names(tmp), invert = F)
 row.names(tmp)[1:10]
 ```
 ```
@@ -232,7 +235,7 @@ integer(0)
 
 Now, let's select only the species level stratifications, removing all taxonomic levels before it:
 ```
-tmp_ind = grep("\\|s__", rownames(tmp))
+tmp_ind = grep("\\|s__", row.names(tmp))
 ```
 
 Create a new dataframe with only those row numbers in `tmp_ind`. Make sure to select from `tmp`, not `species`:
@@ -306,6 +309,17 @@ species_filt = species[apply(species, 1, function(x) sum(x > 0.0001) > 0.1 * nco
 
 ---
 
+---
+* **Why perform this type of filtering? Are there situations were it might not be appropriate?**
+
+<details>
+ <summary><b>Answer:</b></summary>
+ 
+ Low prevalence/abundance features are often not meaningful and can reduce power of some tests. However, one needs to be certain this isn't removing real biological variation. Alpha diversity is sensitive to filtering (so we generally don't) and some datasets have important low prevalence taxa or outlier samples.
+</details>
+
+---
+
 Check the dimensions of species post-filtering:
 ```
 dim(species_filt)
@@ -319,26 +333,14 @@ Let's transpose the dataframes for easier use downstream, making the rows be the
 species_filt = as.data.frame(t(species_filt), check.names = F)
 species = as.data.frame(t(species), check.names = F)
 ```
-Note that `check.names = F` is supplied so that invalid or repeated column names are not flagged as errors. 
-This is useful when you want to make sure your output always matches the original input file formating, but can be dangerous.  
-The `make.names()` function can be used to sanitize character vectors.
 
 Make sure the sample names are in the same order in both the metadata and the species dataframes:
 ```
 all(row.names(metadata) == row.names(species_filt))
 all(row.names(metadata) == row.names(species))
 ```
+Not all tools will check that samples align correctly, so you can easily get results that "look correct" but aren't if you don't do this!
 
----
-* **Why perform this type of filtering? Are there situations were it might not be appropriate?**
-
-<details>
- <summary><b>Answer:</b></summary>
- 
- Low prevalence/abundance features are often not meaningful and can reduce power of some tests. However, one needs to be certain this isn't removing real biological variation. Alpha diversity is sensitive to filtering (so we generally don't) and some datasets have important low prevalence taxa or outlier samples.
-</details>
-
----
 
 >NOTE: These formatted files are also located in the Tutorials/highdimtesting directory of the bioBakery image. To work with them from there assign them in R with the following code:
 >```
@@ -608,6 +610,7 @@ Can do this with a for loop as well:
 for (col in names(metadata)) {
   set.seed(123)
   adonis_univ <- adonis2(as.formula(paste("bray_species ~ ", col)), data = metadata)
+  print(col)
   print(adonis_univ)
 }
 ```
