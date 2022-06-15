@@ -802,7 +802,7 @@ Signif. codes:  0 `***` 0.001 `**` 0.01 `*` 0.05 `.` 0.1 ` ` 1
 <details>
  <summary><b>Answer:</b></summary>
  
- There are known epidemiological incidence and prevalence sex differences in IBD, but they are not straightforward and are confounded by other factors such as age and type of IBD (UC vs CD). Also, some caution should be taken when using and interpreting interaction effects in PERMANOVA models since these are not as developed or rigorously tested as in ANOVA.
+ There are known epidemiological incidence and prevalence sex differences in IBD, but they are not straightforward and are confounded by other factors such as age and type of IBD (UC vs CD) as well as social conditions. Also, some caution should be taken when using and interpreting interaction effects in PERMANOVA models since these are not as developed or rigorously tested as in ANOVA.
 </details>
 
 ---
