@@ -282,6 +282,7 @@ colSums(species)[1:6]
    CSM67UH7    CSM79HHW    HSM67VDT    HSM6XRQB    HSM6XRR3    HSM7J4LP 
   0.9999752   1.0000004   1.0000005   0.9993355   0.9996256   1.0000003 
 ```
+Our downstream analysis require relative abundances so these were previously (as is default for MetaPhlAn) total sum scaled.
 
 It is often useful to filter out low prevalence/abundance features in 'omics data, so we will make a filtered copy of the species table.
 
