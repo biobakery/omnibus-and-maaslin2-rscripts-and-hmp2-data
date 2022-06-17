@@ -26,7 +26,7 @@
 
 In this tutorial, we are going to take data from the second phase of the Human Microbiome Project, and look at some common exploratory analyses which search for evidence of general microbiome associations with cohort metadata. These tests are frequently the first we perform on a new feature table and can give a good idea of things such as the overall strength of an intervention or the degree to which covariates might confound the main microbiome outcomes of interest.
 
-We are starting with the baseline timepoint, metagenome-derived species data, since species tables (+ associated metadata) are what you will likely most commonly encounter, and longitudinal designs require more advanced statistical techniques. 
+We are starting with the baseline timepoint, metagenome-derived species data, since species tables (+ associated metadata) are what you will likely most commonly encounter, and longitudinal designs require more advanced statistical techniques beyond the scope of this tutorial. See the full [HMP2 manuscript](https://www.nature.com/articles/s41586-019-1237-9) for how within-subject correlations were studed (especially wrt PERMANOVA).
 
 Start R and set the working directory. In the bioBakery VM, as follows:
 ```
