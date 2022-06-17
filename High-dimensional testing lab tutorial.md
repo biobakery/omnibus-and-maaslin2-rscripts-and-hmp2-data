@@ -566,7 +566,7 @@ Unlike alpha diversity, beta diversity is not defined on a single sample level, 
 <details>
  <summary><b>Answer:</b></summary>
  
- While one could take a difference of alpha diversity between samples and get a number, this is not particularly robust or meaningful. Alpha diversity trends are also in general more sensitive to difficult to control or arbitrary factors, such as sampling depth and technical noise.
+ While one could take a difference of alpha diversity between samples and get a number, this is not particularly robust or meaningful. Alpha diversity trends are also in general more sensitive to difficult to control or arbitrary factors, such as sampling depth and technical noise, and various alpha diveristy indicies can give very different results, with no clear best practice. 
 </details>
 
 ---
